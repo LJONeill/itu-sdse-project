@@ -9,6 +9,7 @@ from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, 
 import pandas as pd
 import datetime
 import json
+import numpy as np
 
 app = typer.Typer()
 
@@ -62,4 +63,16 @@ data = data.drop(
     axis=1
 )
 
+data["lead_indicator"].replace("", np.nan, inplace=True)
+data["lead_id"].replace("", np.nan, inplace=True)
+data["customer_code"].replace("", np.nan, inplace=True)
 
+data = data.dropna(axis=0, subset=["lead_indicator"])
+data = data.dropna(axis=0, subset=["lead_id"])
+
+data = data[data.source == "signup"]
+result=data.lead_indicator.value_counts(normalize = True)
+
+print("Target value counter")
+for val, n in zip(result.index, result):
+    print(val, ": ", n)
