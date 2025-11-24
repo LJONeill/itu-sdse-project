@@ -76,3 +76,24 @@ result=data.lead_indicator.value_counts(normalize = True)
 print("Target value counter")
 for val, n in zip(result.index, result):
     print(val, ": ", n)
+
+vars = [
+    "lead_id", "lead_indicator", "customer_group", "onboarding", "source", "customer_code"
+]
+
+for col in vars:
+    data[col] = data[col].astype("object")
+    print(f"Changed {col} to object type")
+
+cont_vars = data.loc[:, ((data.dtypes=="float64")|(data.dtypes=="int64"))]
+cat_vars = data.loc[:, (data.dtypes=="object")]
+
+print("\nContinuous columns: \n")
+pprint(list(cont_vars.columns), indent=4)
+print("\n Categorical columns: \n")
+pprint(list(cat_vars.columns), indent=4)
+
+cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),
+                                             upper = (x.mean()+2*x.std())))
+outlier_summary = cont_vars.apply(describe_numeric_col).T
+outlier_summary.to_csv(INTERIM_DATA_DIR "/outlier_summary.csv")
