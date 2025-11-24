@@ -1,8 +1,5 @@
 from pathlib import Path
 
-from loguru import logger
-from tqdm import tqdm
-
 from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
 from sklearn.preprocessing import MinMaxScaler
 
