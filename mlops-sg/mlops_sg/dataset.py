@@ -129,3 +129,9 @@ joblib.dump(value=scaler, filename=scaler_path)
 print("Saved scaler in artifacts")
 
 cont_vars = pd.DataFrame(scaler.transform(cont_vars), columns=cont_vars.columns)
+
+cont_vars = cont_vars.reset_index(drop=True)
+cat_vars = cat_vars.reset_index(drop=True)
+data = pd.concat([cat_vars, cont_vars], axis=1)
+print(f"Data cleansed and combined.\nRows: {len(data)}")
+
