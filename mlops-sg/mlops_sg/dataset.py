@@ -51,3 +51,15 @@ max_date = data["date_part"].max()
 date_limits = {"min_date": str(min_date), "max_date": str(max_date)}
 with open(INTERIM_DATA_DIR/"date_limits.json", "w") as f:
     json.dump(date_limits, f)
+
+data = data.drop(
+    ["is_active", "marketing_consent", "first_booking", "existing_customer", "last_seen"],
+    axis=1
+)
+
+data = data.drop(
+    ["domain", "country", "visited_learn_more_before_booking", "visited_faq"],
+    axis=1
+)
+
+
