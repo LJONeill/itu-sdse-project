@@ -4,12 +4,14 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 
-from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date
+from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
+from sklearn.preprocessing import MinMaxScaler
 
 import pandas as pd
 import datetime
 import json
 import numpy as np
+import joblib
 
 app = typer.Typer()
 
@@ -19,7 +21,8 @@ def main(
     # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
     input_path: Path = RAW_DATA_DIR / "raw_data.csv",
     output_path: Path = PROCESSED_DATA_DIR / "processed_data.csv",
-    date_limits: Path = INTERIM_DATA_DIR / "date_limits.json"
+    date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json",
+    scaler_path: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
     # ----------------------------------------------
 ):
     # ---- REPLACE THIS WITH YOUR OWN CODE ----
@@ -134,3 +137,11 @@ cat_vars.loc[cat_vars['customer_code'].isna(),'customer_code'] = 'None'
 cat_vars = cat_vars.apply(impute_missing_values)
 cat_vars.apply(lambda x: pd.Series([x.count(), x.isnull().sum()], index = ['Count', 'Missing'])).T
 
+scaler = MinMaxScaler()
+scaler.fit(cont_vars)
+
+joblib.dump(value=scaler, filename=scaler_path)
+print("Saved scaler in artifacts")
+
+cont_vars = pd.DataFrame(scaler.transform(cont_vars), columns=cont_vars.columns)
+cont_vars
