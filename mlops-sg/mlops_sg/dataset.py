@@ -34,6 +34,32 @@ def main(
 if __name__ == "__main__":
     app()
 
+# Defined variables for use throughout
+
+def describe_numeric_col(x):
+    """
+    Parameters:
+        x (pd.Series): Pandas col to describe.
+    Output:
+        y (pd.Series): Pandas series with descriptive stats. 
+    """
+    return pd.Series(
+        [x.count(), x.isnull().count(), x.mean(), x.min(), x.max()],
+        index=["Count", "Missing", "Mean", "Min", "Max"]
+    )
+
+def impute_missing_values(x, method="mean"):
+    """
+    Parameters:
+        x (pd.Series): Pandas col to describe.
+        method (str): Values: "mean", "median"
+    """
+    if (x.dtype == "float64") | (x.dtype == "int64"):
+        x = x.fillna(x.mean()) if method=="mean" else x.fillna(x.median())
+    else:
+        x = x.fillna(x.mode()[0])
+    return x
+
 data = pd.read_csv(RAW_DATA_DIR/"raw_data.csv")
 
 if not max_date:
@@ -96,4 +122,15 @@ pprint(list(cat_vars.columns), indent=4)
 cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),
                                              upper = (x.mean()+2*x.std())))
 outlier_summary = cont_vars.apply(describe_numeric_col).T
-outlier_summary.to_csv(INTERIM_DATA_DIR "/outlier_summary.csv")
+outlier_summary.to_csv(INTERIM_DATA_DIR "outlier_summary.csv")
+
+cat_missing_impute = cat_vars.mode(numeric_only=False, dropna=True)
+cat_missing_impute.to_csv(INTERIM_DATA_DIR"cat_missing_impute.csv")
+
+cont_vars = cont_vars.apply(impute_missing_values)
+cont_vars.apply(describe_numeric_col).T
+
+cat_vars.loc[cat_vars['customer_code'].isna(),'customer_code'] = 'None'
+cat_vars = cat_vars.apply(impute_missing_values)
+cat_vars.apply(lambda x: pd.Series([x.count(), x.isnull().sum()], index = ['Count', 'Missing'])).T
+
