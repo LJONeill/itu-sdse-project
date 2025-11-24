@@ -14,13 +14,13 @@ import joblib
 import json
 
 # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-data_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv",
-features_path: Path = PROCESSED_DATA_DIR / "features.csv",
-labels_path: Path = PROCESSED_DATA_DIR / "labels.csv",
-model_path: Path = MODELS_DIR / "model.pkl",
-lr_model_path: Path = MODELS_DIR / "lr_model.pkl",
-column_list_path: Path = MODELS_DIR / "columns_list.json",
-model_results_path: Path = MODELS_DIR /  "model_results.json",
+data_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv"
+features_path: Path = PROCESSED_DATA_DIR / "features.csv"
+labels_path: Path = PROCESSED_DATA_DIR / "labels.csv"
+model_path: Path = MODELS_DIR / "model.pkl"
+lr_model_path: Path = MODELS_DIR / "lr_model.pkl"
+column_list_path: Path = MODELS_DIR / "columns_list.json"
+model_results_path: Path = MODELS_DIR /  "model_results.json"
 
 
 # defined variables for use throughout
