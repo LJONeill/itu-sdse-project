@@ -6,6 +6,10 @@ import typer
 
 from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date
 
+import pandas as pd
+import datetime
+import json
+
 app = typer.Typer()
 
 
