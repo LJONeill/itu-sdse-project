@@ -4,7 +4,7 @@ from loguru import logger
 from tqdm import tqdm
 import typer
 
-from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR
+from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date
 
 app = typer.Typer()
 
