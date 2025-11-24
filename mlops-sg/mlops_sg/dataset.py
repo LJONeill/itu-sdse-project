@@ -2,7 +2,6 @@ from pathlib import Path
 
 from loguru import logger
 from tqdm import tqdm
-import typer
 
 from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
 from sklearn.preprocessing import MinMaxScaler
@@ -13,29 +12,15 @@ import json
 import numpy as np
 import joblib
 
-app = typer.Typer()
 
+# ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
+input_path: Path = RAW_DATA_DIR / "raw_data.csv",
+output_path: Path = PROCESSED_DATA_DIR / "processed_data.csv",
+date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json",
+outlier_summary_path: Path = INTERIM_DATA_DIR / "outlier_summary.csv",
+cat_missing_impute_path: Path = INTERIM_DATA_DIR / "cat_missing_impute.csv",
+scaler_path: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = RAW_DATA_DIR / "raw_data.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "processed_data.csv",
-    date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json",
-    scaler_path: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
-    # ----------------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Processing dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Processing dataset complete.")
-    # -----------------------------------------
-
-
-if __name__ == "__main__":
-    app()
 
 # Defined variables for use throughout
 
@@ -63,7 +48,7 @@ def impute_missing_values(x, method="mean"):
         x = x.fillna(x.mode()[0])
     return x
 
-data = pd.read_csv(RAW_DATA_DIR/"raw_data.csv")
+data = pd.read_csv(input_path)
 
 if not max_date:
     max_date = pd.to_datetime(datetime.datetime.now().date()).date()
@@ -79,7 +64,7 @@ data = data[(data["date_part"] >= min_date) & (data["date_part"] <= max_date)]
 min_date = data["date_part"].min()
 max_date = data["date_part"].max()
 date_limits = {"min_date": str(min_date), "max_date": str(max_date)}
-with open(INTERIM_DATA_DIR/"date_limits.json", "w") as f:
+with open(date_limits_path, "w") as f:
     json.dump(date_limits, f)
 
 data = data.drop(
@@ -125,10 +110,10 @@ pprint(list(cat_vars.columns), indent=4)
 cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),
                                              upper = (x.mean()+2*x.std())))
 outlier_summary = cont_vars.apply(describe_numeric_col).T
-outlier_summary.to_csv(INTERIM_DATA_DIR "outlier_summary.csv")
+outlier_summary.to_csv(outlier_summary_path)
 
 cat_missing_impute = cat_vars.mode(numeric_only=False, dropna=True)
-cat_missing_impute.to_csv(INTERIM_DATA_DIR"cat_missing_impute.csv")
+cat_missing_impute.to_csv(cat_missing_impute_path)
 
 cont_vars = cont_vars.apply(impute_missing_values)
 cont_vars.apply(describe_numeric_col).T
@@ -144,4 +129,3 @@ joblib.dump(value=scaler, filename=scaler_path)
 print("Saved scaler in artifacts")
 
 cont_vars = pd.DataFrame(scaler.transform(cont_vars), columns=cont_vars.columns)
-cont_vars
