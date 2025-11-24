@@ -16,6 +16,7 @@ import joblib
 # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
 input_path: Path = RAW_DATA_DIR / "raw_data.csv",
 training_data_path: Path = PROCESSED_DATA_DIR / "training_data.csv",
+training_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv",
 date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json",
 outlier_summary_path: Path = INTERIM_DATA_DIR / "outlier_summary.csv",
 cat_missing_impute_path: Path = INTERIM_DATA_DIR / "cat_missing_impute.csv",
@@ -152,3 +153,5 @@ mapping = {'li' : 'socials',
            }
 
 data['bin_source'] = data['source'].map(mapping)
+
+data.to_csv(training_gold_path, index=False)
