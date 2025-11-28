@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from mlops_sg.config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
-from sklearn.preprocessing import MinMaxScaler
+
 
 import pandas as pd
 import datetime
@@ -13,6 +13,7 @@ import joblib
 # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
 input_path: Path = RAW_DATA_DIR / "raw_data.csv",
 training_data_path: Path = PROCESSED_DATA_DIR / "training_data.csv",
+cleaned_data_path: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
 training_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv",
 date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json",
 outlier_summary_path: Path = INTERIM_DATA_DIR / "outlier_summary.csv",
@@ -49,5 +50,4 @@ data = data.drop(
     axis=1
 )
 
-#maybe here is the end of dataset and the start of features
-
+data.to_csv(cleaned_data_path, index=False)
