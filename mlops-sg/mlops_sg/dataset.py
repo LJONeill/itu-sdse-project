@@ -21,31 +21,7 @@ scaler_path: Path = EXTERNAL_DATA_DIR / "scaler.pkl",
 column_drift_path: Path = INTERIM_DATA_DIR / "columns_drift.json"
 
 
-# Defined variables for use throughout
 
-def describe_numeric_col(x):
-    """
-    Parameters:
-        x (pd.Series): Pandas col to describe.
-    Output:
-        y (pd.Series): Pandas series with descriptive stats. 
-    """
-    return pd.Series(
-        [x.count(), x.isnull().count(), x.mean(), x.min(), x.max()],
-        index=["Count", "Missing", "Mean", "Min", "Max"]
-    )
-
-def impute_missing_values(x, method="mean"):
-    """
-    Parameters:
-        x (pd.Series): Pandas col to describe.
-        method (str): Values: "mean", "median"
-    """
-    if (x.dtype == "float64") | (x.dtype == "int64"):
-        x = x.fillna(x.mean()) if method=="mean" else x.fillna(x.median())
-    else:
-        x = x.fillna(x.mode()[0])
-    return x
 
 data = pd.read_csv(input_path)
 
@@ -76,6 +52,8 @@ data = data.drop(
     axis=1
 )
 
+#maybe here is the end of dataset and the start of features
+
 data["lead_indicator"].replace("", np.nan, inplace=True)
 data["lead_id"].replace("", np.nan, inplace=True)
 data["customer_code"].replace("", np.nan, inplace=True)
@@ -101,10 +79,10 @@ for col in vars:
 cont_vars = data.loc[:, ((data.dtypes=="float64")|(data.dtypes=="int64"))]
 cat_vars = data.loc[:, (data.dtypes=="object")]
 
-print("\nContinuous columns: \n")
-pprint(list(cont_vars.columns), indent=4)
-print("\n Categorical columns: \n")
-pprint(list(cat_vars.columns), indent=4)
+#print("\nContinuous columns: \n")
+#print(list(cont_vars.columns), indent=4)
+#print("\n Categorical columns: \n")
+#print(list(cat_vars.columns), indent=4)
 
 cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),
                                              upper = (x.mean()+2*x.std())))

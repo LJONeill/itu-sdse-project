@@ -1,29 +1,30 @@
 from pathlib import Path
 
-from loguru import logger
-from tqdm import tqdm
-import typer
 
 from mlops_sg.config import PROCESSED_DATA_DIR
 
-app = typer.Typer()
+# Defined variables for use throughout
 
+def describe_numeric_col(x):
+    """
+    Parameters:
+        x (pd.Series): Pandas col to describe.
+    Output:
+        y (pd.Series): Pandas series with descriptive stats. 
+    """
+    return pd.Series(
+        [x.count(), x.isnull().count(), x.mean(), x.min(), x.max()],
+        index=["Count", "Missing", "Mean", "Min", "Max"]
+    )
 
-@app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    input_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "features.csv",
-    # -----------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Generating features from dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Features generation complete.")
-    # -----------------------------------------
-
-
-if __name__ == "__main__":
-    app()
+def impute_missing_values(x, method="mean"):
+    """
+    Parameters:
+        x (pd.Series): Pandas col to describe.
+        method (str): Values: "mean", "median"
+    """
+    if (x.dtype == "float64") | (x.dtype == "int64"):
+        x = x.fillna(x.mean()) if method=="mean" else x.fillna(x.median())
+    else:
+        x = x.fillna(x.mode()[0])
+    return x
