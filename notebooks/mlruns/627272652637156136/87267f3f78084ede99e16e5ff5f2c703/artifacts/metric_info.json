@@ -1,0 +1,3 @@
+{
+  "f1_score_X_test": "f1_score(y_true=y_test, y_pred=y_pred_test)"
+}
