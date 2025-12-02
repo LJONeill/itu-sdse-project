@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import joblib
 import json
 
-# ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
+# Paths
 data_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv"
 features_path: Path = PROCESSED_DATA_DIR / "features.csv"
 labels_path: Path = PROCESSED_DATA_DIR / "labels.csv"
@@ -23,19 +23,22 @@ column_list_path: Path = MODELS_DIR / "columns_list.json"
 model_results_path: Path = MODELS_DIR /  "model_results.json"
 
 
-# defined variables for use throughout
+# Defined functions for use throughout
 def create_dummy_cols(df, col):
     df_dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
     new_df = pd.concat([df, df_dummies], axis=1)
     new_df = new_df.drop(col, axis=1)
     return new_df
 
+# Define experiment name
 current_date = datetime.datetime.now().strftime("%Y_%B_%d")
 data_version = "00000"
 experiment_name = current_date
 
+# Start mlflow tracking
 mlflow.set_experiment(experiment_name)
 
+# Load the data
 data = pd.read_csv(data_gold_path)
 
 data = data.drop(["lead_id", "customer_code", "date_part"], axis=1)
