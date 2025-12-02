@@ -22,14 +22,6 @@ lr_model_path: Path = MODELS_DIR / "lr_model.pkl"
 column_list_path: Path = MODELS_DIR / "columns_list.json"
 model_results_path: Path = MODELS_DIR /  "model_results.json"
 
-
-# Defined functions for use throughout
-def create_dummy_cols(df, col):
-    df_dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
-    new_df = pd.concat([df, df_dummies], axis=1)
-    new_df = new_df.drop(col, axis=1)
-    return new_df
-
 # Define experiment name
 current_date = datetime.datetime.now().strftime("%Y_%B_%d")
 data_version = "00000"
@@ -41,30 +33,18 @@ mlflow.set_experiment(experiment_name)
 # Load the data
 data = pd.read_csv(data_gold_path)
 
-data = data.drop(["lead_id", "customer_code", "date_part"], axis=1)
-
-cat_cols = ["customer_group", "onboarding", "bin_source", "source"]
-cat_vars = data[cat_cols]
-
-other_vars = data.drop(cat_cols, axis=1)
-
-for col in cat_vars:
-    cat_vars[col] = cat_vars[col].astype("category")
-    cat_vars = create_dummy_cols(cat_vars, col)
-
-data = pd.concat([other_vars, cat_vars], axis=1)
-
-for col in data:
-    data[col] = data[col].astype("float64")
-    print(f"Changed column {col} to float")
-
+# Separate features from labels
 y = data["lead_indicator"]
 X = data.drop(["lead_indicator"], axis=1)
 
+# Train test split
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, random_state=42, test_size=0.15, stratify=y)
 
+# Define xgboost model
 model = XGBRFClassifier(random_state=42)
+
+# Define parameter possibilities
 params = {
     "learning_rate": uniform(1e-2, 3e-1),
     "min_split_loss": uniform(0, 10),
@@ -74,13 +54,15 @@ params = {
     "eval_metric": ["aucpr", "error"]
 }
 
+# Define grid search with given xgboost model and parameters
 model_grid = RandomizedSearchCV(model, param_distributions=params, n_jobs=-1, verbose=3, n_iter=10, cv=10)
 
+# Perform grid search
 model_grid.fit(X_train, y_train)
 
+# Store best fit parameters
 best_model_xgboost_params = model_grid.best_params_
-print("Best xgboost params")
-pprint(best_model_xgboost_params)
+
 
 y_pred_train = model_grid.predict(X_train)
 y_pred_test = model_grid.predict(X_test)

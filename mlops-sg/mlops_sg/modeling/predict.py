@@ -10,7 +10,7 @@ import json
 import pandas as pd
 import mlflow
 
-#filepaths
+# Paths
 model_results_path: Path = MODELS_DIR /  "model_results.json"
 
 
