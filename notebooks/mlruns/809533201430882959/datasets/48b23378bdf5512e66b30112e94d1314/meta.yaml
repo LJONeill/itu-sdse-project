@@ -1,0 +1,16 @@
+digest: ba19793e
+name: dataset
+profile: '{"num_rows": 441, "num_elements": 5292}'
+schema: '{"mlflow_colspec": [{"type": "double", "name": "purchases", "required": true},
+  {"type": "double", "name": "time_spent", "required": true}, {"type": "double", "name":
+  "n_visits", "required": true}, {"type": "double", "name": "customer_group_2", "required":
+  true}, {"type": "double", "name": "customer_group_3", "required": true}, {"type":
+  "double", "name": "customer_group_4", "required": true}, {"type": "double", "name":
+  "customer_group_5", "required": true}, {"type": "double", "name": "customer_group_6",
+  "required": true}, {"type": "double", "name": "customer_group_7", "required": true},
+  {"type": "double", "name": "customer_group_8", "required": true}, {"type": "double",
+  "name": "customer_group_9", "required": true}, {"type": "double", "name": "onboarding_True",
+  "required": true}]}'
+source: '{"tags": {"mlflow.user": "luke0", "mlflow.source.name": "c:\\Users\\luke0\\miniconda3\\Lib\\site-packages\\ipykernel_launcher.py",
+  "mlflow.source.type": "LOCAL"}}'
+source_type: code

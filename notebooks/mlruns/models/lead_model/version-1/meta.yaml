@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1764690921822
+current_stage: Staging
+description: null
+last_updated_timestamp: 1764690921873
+name: lead_model
+run_id: 185a01d07d8f4365a950293b5c981f4c
+run_link: null
+source: file:///c:/Users/luke0/Documents/5th%20Semester/DataScienceInProductionMLOps/itu-forked-project/notebooks/mlruns/809533201430882959/185a01d07d8f4365a950293b5c981f4c/artifacts/model
+status: READY
+status_message: null
+storage_location: file:///c:/Users/luke0/Documents/5th%20Semester/DataScienceInProductionMLOps/itu-forked-project/notebooks/mlruns/809533201430882959/185a01d07d8f4365a950293b5c981f4c/artifacts/model
+user_id: null
+version: 1

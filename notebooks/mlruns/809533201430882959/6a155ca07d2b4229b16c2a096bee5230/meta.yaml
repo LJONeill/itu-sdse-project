@@ -1,0 +1,15 @@
+artifact_uri: file:///c:/Users/luke0/Documents/5th%20Semester/DataScienceInProductionMLOps/itu-forked-project/notebooks/mlruns/809533201430882959/6a155ca07d2b4229b16c2a096bee5230/artifacts
+end_time: 1764690912481
+entry_point_name: ''
+experiment_id: '809533201430882959'
+lifecycle_stage: active
+run_id: 6a155ca07d2b4229b16c2a096bee5230
+run_name: redolent-hen-620
+run_uuid: 6a155ca07d2b4229b16c2a096bee5230
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1764690911427
+status: 3
+tags: []
+user_id: luke0
