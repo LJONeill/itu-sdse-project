@@ -60,14 +60,9 @@ model_grid = RandomizedSearchCV(model, param_distributions=params, n_jobs=-1, ve
 # Perform grid search
 model_grid.fit(X_train, y_train)
 
-<<<<<<< HEAD
-# Extract best fit hyperparameters (only print)
-best_model_xgboost_params = model_grid.best_params_
-=======
 # Make predictions
 y_pred_train = model_grid.predict(X_train)
 y_pred_test = model_grid.predict(X_test)
->>>>>>> fbc6e4a (docs(train): added predict, removed parameter storing)
 
 # Output the best xgboost model
 xgboost_model = model_grid.best_estimator_
