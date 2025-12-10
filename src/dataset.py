@@ -33,16 +33,22 @@ def define_dates(min_date, max_date):
     min_date = pd.to_datetime(min_date).date()
     return min_date, max_date
 
-# Limit data by the above date bounds
-data["date_part"] = pd.to_datetime(data["date_part"]).dt.date
-data = data[(data["date_part"] >= min_date) & (data["date_part"] <= max_date)]
+# Limit data 
 
-min_date = data["date_part"].min()
-max_date = data["date_part"].max()
-date_limits = {"min_date": str(min_date), "max_date": str(max_date)}
+def filter_data_by_date (data, min_date, max_date):
+    data["date_part"] = pd.to_datetime(data["date_part"]).dt.date
+    data = data[(data["date_part"] >= min_date) & (data["date_part"] <= max_date)]
+    return data
 
-# Write out date limits
-with open(date_limits_path, "w") as f:
+# Storing dates
+
+def store_date_limits(min_date, max_date):
+    date_limits = {
+        "min_date": str(min_date),
+        "max_date": str(max_date)
+    }
+    
+    with open(date_limits_path, "w") as f:
     json.dump(date_limits, f)
 
 # Drop columns from data
