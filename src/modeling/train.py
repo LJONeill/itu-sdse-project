@@ -2,9 +2,10 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, cohen_kappa_score, f1_score
 from sklearn.linear_model import LogisticRegression
-from ..config import MODELS_DIR, PROCESSED_DATA_DIR
+from ..config import MODELS_DIR, PROCESSED_DATA_DIR, random_state
 from xgboost import XGBRFClassifier
 from scipy.stats import uniform, randint
+from ..dataset import load_data
 
 import datetime
 import mlflow
@@ -27,25 +28,8 @@ current_date = datetime.datetime.now().strftime("%Y_%B_%d")
 data_version = "00000"
 experiment_name = current_date
 
-# Start mlflow tracking
-mlflow.set_experiment(experiment_name)
-
-# Load the data
-data = pd.read_csv(data_gold_path)
-
-# Separate features from labels
-y = data["lead_indicator"]
-X = data.drop(["lead_indicator"], axis=1)
-
-# Train test split
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, random_state=42, test_size=0.15, stratify=y)
-
-# Define xgboost model
-model = XGBRFClassifier(random_state=42)
-
-# Define hyperparameter possibilities
-params = {
+# Parameter defines by model
+xgboost_params = {
     "learning_rate": uniform(1e-2, 3e-1),
     "min_split_loss": uniform(0, 10),
     "max_depth": randint(3, 10),
@@ -54,24 +38,92 @@ params = {
     "eval_metric": ["aucpr", "error"]
 }
 
-# Define grid search with given xgboost model and hyperparameters
-model_grid = RandomizedSearchCV(model, param_distributions=params, n_jobs=-1, verbose=3, n_iter=10, cv=10)
+lr_params = {
+    'solver': ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
+    'penalty':  ["none", "l1", "l2", "elasticnet"],
+    'C' : [100, 10, 1.0, 0.1, 0.01]
+    }
 
-# Perform grid search
-model_grid.fit(X_train, y_train)
+# Load the data
+data = load_data(data_gold_path)
 
-# Make predictions
-y_pred_train = model_grid.predict(X_train)
-y_pred_test = model_grid.predict(X_test)
+# Start mlflow tracking
+mlflow.set_experiment(experiment_name)
 
-# Output the best xgboost model
-xgboost_model = model_grid.best_estimator_
-xgboost_model.save_model(xgboost_model_path)
 
-# Initiate set of all model results and add xgboost results
-model_results = {
-    xgboost_model_path: classification_report(y_train, y_pred_train, output_dict=True)
-}
+def separate_feats_labels(
+        data: pd.DataFrame, 
+        labels_column: str = "lead_indicator",
+        ):
+    '''Identify labels column to separate features data from labels data'''
+    y = data[labels_column]
+    X = data.drop([labels_column], axis=1)
+    return X, y
+
+def perform_train_test_split(X, y, random_state=random_state, test_size=0.15, stratify=y)
+    '''Perform train test split'''
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, random_state=random_state, test_size=test_size, stratify=stratify)
+    return X_train, X_test, y_train, y_test
+
+def prepare_data_for_models(data: pd.DataFrame):
+
+    X, y = separate_feats_labels()
+    return perform_train_test_split()
+
+
+def setup_grid_search(
+        model_class_choice: Literal["xgboost", "lr"] = "lr",
+        params: Literal[xgboost_params, lr_params],
+        ):
+
+    if model_class_choice == "xgboost":
+        model = XGBRFClassifier()
+        params = xgboost_params
+    elif model_class_choice == "lr":
+        model = LogisticRegression()
+        params = lr_params
+    else:
+        print("Error: Invalid model choice entered, please choose between xgboost or lr")
+
+    model_grid = RandomizedSearchCV(
+        model,
+        param_distributions=params,
+        n_jobs=-1,
+        verbose=3,
+        n_iter=10,
+        cv=10,
+        )
+    
+    return model_grid, model_class_choice
+    
+def make_model_predictions(
+        model_class_choice: Literal["xgboost", "lr"] = "lr",
+):
+
+    if model_class_choice == "xgboost":
+        model_path = xgboost_model_path
+    elif model_class_choice == "lr":
+        model_path = lr_model_path
+    else:
+        print("Error: Invalid model_class_choice, choose xgboost or lr")
+
+    prepare_data_for_models()
+    setup_grid_search()
+
+    model_grid.fit(X_train, y_train)
+
+    y_pred_train = model_grid.predict(X_train)
+    y_pred_test = model_grid.predict(X_test)
+
+    best_model = model_grid.best_estimator_
+    best_model.save_model(model_path)
+    
+    model_results = {
+        model_path: classification_report(y_train, y_pred_train, output_dict=True)
+    }
+
+    return model_results
 
 # Create a class with a predict function to show model results
 class lr_wrapper(mlflow.pyfunc.PythonModel):
@@ -89,20 +141,7 @@ experiment_id = mlflow.get_experiment_by_name(experiment_name).experiment_id
 
 # run logistic regression model training
 with mlflow.start_run(experiment_id=experiment_id) as run:
-    model = LogisticRegression()
-
-    params = {
-              'solver': ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
-              'penalty':  ["none", "l1", "l2", "elasticnet"],
-              'C' : [100, 10, 1.0, 0.1, 0.01]
-    }
-    model_grid = RandomizedSearchCV(model, param_distributions= params, verbose=3, n_iter=10, cv=3)
-    model_grid.fit(X_train, y_train)
-
-    best_model = model_grid.best_estimator_
-
-    y_pred_train = model_grid.predict(X_train)
-    y_pred_test = model_grid.predict(X_test)
+    
 
 
     # log artifacts
@@ -135,3 +174,13 @@ with open(model_results_path, 'w+') as results_file:
 =======
     json.dump(model_results, results_file)
 >>>>>>> fbc6e4a (docs(train): added predict, removed parameter storing)
+
+def prepare_data_for_models():
+    separate_feats_labels()
+    perform_train_test_split()
+
+prepare_data_for_models(data)
+
+train_model(model_class_choice="xgboost")
+
+train_model(model_class_choice= "lr")
