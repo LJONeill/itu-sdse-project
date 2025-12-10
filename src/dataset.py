@@ -52,7 +52,9 @@ def store_date_limits(min_date, max_date):
     json.dump(date_limits, f)
 
 # Drop columns from data
-data = data.drop(
+
+def drop_columns(data, columns_to_drop):
+    data = data.drop(
     [
      "is_active", 
      "marketing_consent", 
@@ -65,7 +67,11 @@ data = data.drop(
      "visited_faq"
      ],
     axis=1
-)
+    )
+    return data
+
+# Need to add docstrings to all functions
+# Need to understand main script? 
 
 # Write out cleaned data
 data.to_csv(cleaned_data_path, index=False)
