@@ -18,8 +18,9 @@ date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json"
 
 # Load data
 
-# Load data
-data = pd.read_csv(input_path)
+def load_data(path: Path) -> pd.DataFrame:
+    """Load data from a CSV file located at the given path."""
+    return pd.read_csv(path)
 
 # Define the date limits in datetime format
 if not max_date:
