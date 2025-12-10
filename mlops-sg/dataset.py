@@ -14,6 +14,13 @@ date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json"
 # Load data
 data = pd.read_csv(input_path)
 
+# Load data function version
+
+def load_data(input_path: Path) -> pd.DataFrame:
+    if not path.exists():
+        raise FileNotFoundError(f"Data file not found at {path}")
+    return pd.read_csv(path)
+
 # Define the date limits in datetime format
 if not max_date:
     max_date = pd.to_datetime(datetime.datetime.now().date()).date()
@@ -29,6 +36,7 @@ data = data[(data["date_part"] >= min_date) & (data["date_part"] <= max_date)]
 min_date = data["date_part"].min()
 max_date = data["date_part"].max()
 date_limits = {"min_date": str(min_date), "max_date": str(max_date)}
+
 
 # Write out date limits
 with open(date_limits_path, "w") as f:
