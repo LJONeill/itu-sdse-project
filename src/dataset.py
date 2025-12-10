@@ -1,15 +1,22 @@
+# Imports
+
 from pathlib import Path
-
-from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
-
 import pandas as pd
 import datetime
 import json
 
-# Paths
+from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
+
+
+# Config + paths
+
 input_path: Path = RAW_DATA_DIR / "raw_data.csv"
 cleaned_data_path: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
 date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json"
+
+# Functions
+
+# Load data
 
 # Load data
 data = pd.read_csv(input_path)
