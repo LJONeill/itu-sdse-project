@@ -2,7 +2,7 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, cohen_kappa_score, f1_score
 from sklearn.linear_model import LogisticRegression
-from mlops_sg.config import MODELS_DIR, PROCESSED_DATA_DIR
+from ..config import MODELS_DIR, PROCESSED_DATA_DIR
 from xgboost import XGBRFClassifier
 from scipy.stats import uniform, randint
 
