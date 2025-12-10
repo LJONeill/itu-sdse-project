@@ -5,8 +5,7 @@ import pandas as pd
 import datetime
 import json
 
-from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR
-
+from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, max_date, min_date, EXTERNAL_DATA_DIR # What is the exertnal data dir used for?
 
 # Config + paths
 
@@ -22,13 +21,17 @@ def load_data(path: Path) -> pd.DataFrame:
     """Load data from a CSV file located at the given path."""
     return pd.read_csv(path)
 
-# Define the date limits in datetime format
-if not max_date:
-    max_date = pd.to_datetime(datetime.datetime.now().date()).date()
-else:
-    max_date = pd.to_datetime(max_date).date()
+# Date limits
 
-min_date = pd.to_datetime(min_date).date()
+def define_dates(min_date, max_date):
+    """Define the date limits in datetime format."""
+    if not max_date: # I am not sure it makes sense to have this check as the first line in the function?
+        max_date = pd.to_datetime(datetime.datetime.now().date()).date()
+    else:
+        max_date = pd.to_datetime(max_date).date()
+
+    min_date = pd.to_datetime(min_date).date()
+    return min_date, max_date
 
 # Limit data by the above date bounds
 data["date_part"] = pd.to_datetime(data["date_part"]).dt.date
