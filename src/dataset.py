@@ -73,5 +73,18 @@ def drop_columns(data, columns_to_drop):
 # Need to add docstrings to all functions
 # Need to understand main script? 
 
+if __name__ == "__main__":
+
+    #Load data
+    data = load_data(input_path)
+
+    Date limit...
+
+    
+
+    #Clean data 
+
 # Write out cleaned data
 data.to_csv(cleaned_data_path, index=False)
+
+
