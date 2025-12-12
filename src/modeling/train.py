@@ -107,7 +107,7 @@ def make_model_predictions(
   
     model_results[model_path] = classification_report(y_train, y_pred_train, output_dict=True)
 
-    return model_grid, model_results
+    return model_grid, model_results, X_test, y_test
 
 def train_and_save_model(
         model_class_choice: Literal["xgboost", "lr"],
@@ -121,13 +121,18 @@ def train_and_save_model(
 
     with mlflow.start_run(experiment_id=experiment_id) as run:
 
-        model_grid, model_results = make_model_predictions()
+        model_grid, model_results, X_test, y_test = make_model_predictions()
 
         best_model = model_grid.best_estimator_
+
+        y_pred_test = model_grid.predict(X_test)
 
     if model_class_choice == "xgboost":
         best_model.save_model(model_path)
     elif model_class_choice == "lr":
+        mlflow.log_metric('f1_score', f1_score(y_test, y_pred_test))
+        mlflow.log_artifacts("artifacts", artifact_path="model")
+        mlflow.log_param("data_version", "00000")
         mlflow.pyfunc.log_model('model', python_model=lr_wrapper(best_model))
         joblib.dump(value=best_model, filename=model_path)
     else:
