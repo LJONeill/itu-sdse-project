@@ -5,18 +5,12 @@ from train import experiment_name
 
 from ..config import MODELS_DIR, PROCESSED_DATA_DIR
 
-import datetime
 import time
 import json
-import pandas as pd
 import mlflow
 
 # Paths
 model_results_path: Path = MODELS_DIR /  "model_results.json"
-
-artifact_path = "model"
-model_name = "lead_model"
-client = MlflowClient()
 
 def identify_best_experiment(experiment_name):
 
@@ -30,7 +24,7 @@ def identify_best_experiment(experiment_name):
 
     return experiment_best
 
-def get_production_model():
+def get_production_model_id():
 
     prod_model = [model for model in client.search_model_versions(f"name='{model_name}'") if dict(model)['current_stage']=='Production']
 
@@ -39,7 +33,7 @@ def get_production_model():
     else:
         prod_model_run_id = dict(prod_model[0])['run_id']
         
-    return prod_model, prod_model_run_id
+    return prod_model_run_id
 
 def wait_until_ready(model_name, model_version):
     for _ in range(10):
@@ -48,14 +42,14 @@ def wait_until_ready(model_name, model_version):
           version=model_version,
         )
         status = ModelVersionStatus.from_string(model_version_details.status)
+        print(f"Model status: {ModelVersionStatus.to_string(status)}")
         if status == ModelVersionStatus.READY:
             break
         time.sleep(1)
         
 def identify_and_register_best_model(
         experiment_best,
-        prod_model,
-        prod_model_run_id
+        prod_model_run_id,
         ):
     
     model_status = {}
@@ -100,10 +94,19 @@ def wait_for_deployment(model_name, model_version, stage='Staging'):
             time.sleep(2)
     return status
 
-model_version = 1
+artifact_path = "model"
+model_name = "lead_model"
+client = MlflowClient()
 
+identify_and_register_best_model(
+    identify_best_experiment(), 
+    get_production_model_id(),
+    )
+
+model_version = 1
 model_version_details = dict(client.get_model_version(name=model_name,version=model_version))
 model_status = True
+
 if model_version_details['current_stage'] != 'Staging':
     client.transition_model_version_stage(
         name=model_name,
