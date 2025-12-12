@@ -70,22 +70,26 @@ def drop_columns(data, columns_to_drop):
     )
     return data
 
-# Need to add docstrings to all functions
-# Need to understand main script? 
+
+# Docker main script
+@app.command()
+def main(
+    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
+    input_path: Path = RAW_DATA_DIR / "dataset.csv",
+    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
+    # ----------------------------------------------
+):
+    # ---- REPLACE THIS WITH YOUR OWN CODE ----
+    logger.info("Processing dataset...")
+    for i in tqdm(range(10), total=10):
+        if i == 5:
+            logger.info("Something happened for iteration 5.")
+    logger.success("Processing dataset complete.")
+    # -----------------------------------------
+
 
 if __name__ == "__main__":
-
-    #Load data
-    data = load_data(input_path)
-
-    Date limit...
-
-    
-
-    #Clean data 
-
-# Write out cleaned data
-data.to_csv(cleaned_data_path, index=False)
+    app()
 
 
 #Mlflow
