@@ -88,3 +88,12 @@ if __name__ == "__main__":
 data.to_csv(cleaned_data_path, index=False)
 
 
+#Mlflow
+
+with mlflow.start_run():
+    mlflow.log_param("min_date", str(min_date))
+    mlflow.log_param("max_date", str(max_date))
+    mlflow.log_artifact(cleaned_data_path)
+    mlflow.log_artifact(date_limits_path)
+
+
