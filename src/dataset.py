@@ -162,7 +162,6 @@ def main(
 
     # Drop columns and save cleaned data
     data = drop_columns(data, ALL_COLUMNS_TO_DROP)
-    data.to_csv(output_path, index=False)
 
     # Data cleaning (should come after dropping right?)
     data = replace_empty_with_nan(data, COLUMNS_TO_CLEAN,)
