@@ -7,6 +7,7 @@ import json
 
 # Third-party libraries
 import pandas as pd
+import numpy as np
 import mlflow
 import typer
 from loguru import logger
@@ -80,7 +81,7 @@ def store_date_limits(min_date, max_date):
         "max_date": str(max_date),
     }
 
-    with open(date_limits_path, "w") as f:
+    with open(DATE_LIMITS_PATH, "w") as f:
         json.dump(date_limits, f)
 
 # Drop columns from data
