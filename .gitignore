@@ -1,2 +1,9 @@
+# Local files
 .DS_Store
+
+# VScode
 .vscode/
+
+# dvc files
+.dvc/tmp/
+.dvc/cache/
