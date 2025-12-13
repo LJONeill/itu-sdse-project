@@ -21,7 +21,7 @@ from config import (
 
 app = typer.Typer()
 
-# Config + paths
+# Paths
 
 INPUT_PATH: Path = RAW_DATA_DIR / "raw_data.csv" #constant should be capitalized
 CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"

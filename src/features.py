@@ -1,21 +1,37 @@
+# Imports
+
+# Standard libraries
 from pathlib import Path
-from sklearn.preprocessing import MinMaxScaler
-
-from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, EXTERNAL_DATA_DIR
-
-import numpy as np
-import pandas as pd
-import joblib
 import json
 
+# Third-party libraries
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+import joblib
+
+from config import (
+    PROCESSED_DATA_DIR,
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+)
+
+
+
 # Paths
-training_data_path: Path = PROCESSED_DATA_DIR / "training_data.csv",
-cleaned_data_path: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
-training_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv",
-outlier_summary_path: Path = INTERIM_DATA_DIR / "outlier_summary.csv",
-cat_missing_impute_path: Path = INTERIM_DATA_DIR / "cat_missing_impute.csv",
-scaler_path: Path = EXTERNAL_DATA_DIR / "scaler.pkl",
-column_drift_path: Path = INTERIM_DATA_DIR / "columns_drift.json"
+
+# Processed data paths
+TRAINING_DATA_PATH: Path = PROCESSED_DATA_DIR / "training_data.csv"
+CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
+TRAINING_GOLD_PATH: Path = PROCESSED_DATA_DIR / "training_gold.csv"
+
+# Interim data paths
+OUTLIER_SUMMARY_PATH: Path = INTERIM_DATA_DIR / "outlier_summary.csv"
+CAT_MISSING_IMPUTE_PATH: Path = INTERIM_DATA_DIR / "cat_missing_impute.csv"
+COLUMN_DRIFT_PATH: Path = INTERIM_DATA_DIR / "columns_drift.json"
+
+# External artifacts
+SCALER_PATH: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
 
 # Define functions
 def describe_numeric_col(x):
