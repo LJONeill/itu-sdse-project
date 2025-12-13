@@ -13,6 +13,9 @@ import joblib
 from config import (
     PROCESSED_DATA_DIR,
     INTERIM_DATA_DIR,
+    CLEANED_DATA_PATH,
+    TRAINING_GOLD_PATH,
+    SCALER_PATH,
     COLUMNS_TO_CLEAN,
     COLUMNS_REQUIRED,
     COLUMNS_TO_OBJECT,
@@ -21,9 +24,11 @@ from config import (
 # Paths
 
 # Processed data paths
-TRAINING_DATA_PATH: Path = PROCESSED_DATA_DIR / "training_data.csv"
-CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
-TRAINING_GOLD_PATH: Path = PROCESSED_DATA_DIR / "training_gold.csv"
+#TRAINING_DATA_PATH: Path = PROCESSED_DATA_DIR / "training_data.csv"
+#CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
+#TRAINING_GOLD_PATH: Path = PROCESSED_DATA_DIR / "training_gold.csv"
+# removing cause already in config.py
+
 
 # Interim data paths
 OUTLIER_SUMMARY_PATH: Path = INTERIM_DATA_DIR / "outlier_summary.csv"
@@ -31,7 +36,8 @@ CAT_MISSING_IMPUTE_PATH: Path = INTERIM_DATA_DIR / "cat_missing_impute.csv"
 COLUMN_DRIFT_PATH: Path = INTERIM_DATA_DIR / "columns_drift.json"
 
 # External artifacts
-SCALER_PATH: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
+# SCALER_PATH: Path = EXTERNAL_DATA_DIR / "scaler.pkl" 
+#Moved to config
 
 
 def describe_numeric_col(x: pd.Series) -> pd.Series:
