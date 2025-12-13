@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 import joblib
+import mlflow
+import typer
+from loguru import logger
 
 from config import (
     PROCESSED_DATA_DIR,
@@ -295,10 +298,76 @@ def main(
     # Load data
     data = load_data(input_path)
 
+    # Data cleaning (not sure this should be here?)
+
+    data = replace_empty_with_nan(data, COLUMNS_TO_CLEAN)
+    data = drop_rows_with_missing_values(data, COLUMNS_REQUIRED)
+    data = columns_to_object(data, COLUMNS_TO_OBJECT)
+
+    data = bin_source_category(data)
+
+    cont_vars, cat_vars = split_continuous_and_categorical(data)
+
+    cont_vars = handle_continuous_outliers(
+        cont_vars,
+        OUTLIER_SUMMARY_PATH,
+    )
+
+    cont_vars = impute_continueus_variables(cont_vars)
+
+    scaler_obj = scaler(
+        cont_vars,
+        SCALER_PATH,
+    )
+
+    cont_vars = scale_continuous_variables(
+        cont_vars,
+        scaler_obj,
+    )
+
+    save_categorical_imputation_values(
+        cat_vars,
+        CAT_MISSING_IMPUTE_PATH,
+    )
+
+    cat_vars = impute_categorical_variables(cat_vars)
+
+    data = recombine_categorical_and_continuous(
+        cat_vars,
+        cont_vars,
+    )
+
+    data = one_hot_encode_categorical_variables(
+        data,
+        cat_cols=cat_vars.columns.tolist(),
+    )
+
+    other_vars = data.drop(columns=[], errors="ignore")
+    data = recombine_and_cast_to_float(
+        other_vars,
+        pd.DataFrame(),
+    )
+
+    store_data_and_columns(
+        data=data,
+        columns_path=COLUMN_DRIFT_PATH,
+        data_path=output_path,
+    )
+
+    save_features_data(
+        data,
+        output_path,
+    )
+
         # MLflow tracking
     with mlflow.start_run():
-        mlflow.log_param()
-        mlflow.log_artifact()
+        mlflow.log_param("rows", data.shape[0])
+        mlflow.log_param("features", data.shape[1])
+        mlflow.log_artifact(output_path)
+        mlflow.log_artifact(OUTLIER_SUMMARY_PATH)
+        mlflow.log_artifact(CAT_MISSING_IMPUTE_PATH)
+        mlflow.log_artifact(COLUMN_DRIFT_PATH)
+        mlflow.log_artifact(SCALER_PATH)
 
     logger.success("Processing done")
 
