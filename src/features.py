@@ -14,6 +14,9 @@ from config import (
     PROCESSED_DATA_DIR,
     RAW_DATA_DIR,
     INTERIM_DATA_DIR,
+    COLUMNS_TO_CLEAN,
+    COLUMNS_REQUIRED,
+    COLUMNS_TO_OBJECT,
 )
 
 # Paths
@@ -32,64 +35,30 @@ COLUMN_DRIFT_PATH: Path = INTERIM_DATA_DIR / "columns_drift.json"
 SCALER_PATH: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
 
 
-
 def describe_numeric_col(x: pd.Series) -> pd.Series:
-    """Return descriptive statistics for a numeric pandas Series.
-
-    Parameters:
-        x (pd.Series): Pandas Series to describe.
-
-    Returns:
-        pd.Series: Descriptive statistics including count, missing values,
-        mean, min, and max.
-    """
+    """Return basic descriptive statistics for a numeric Series."""
     return pd.Series(
         [x.count(), x.isnull().sum(), x.mean(), x.min(), x.max()],
         index=["Count", "Missing", "Mean", "Min", "Max"],
     )
 
+
 def impute_missing_values(x: pd.Series, method: str = "mean") -> pd.Series:
-    """Impute missing values in a pandas Series.
-
-    For numerical variables, imputes the mean or median based on the
-    specified method. For non-numerical variables, imputes the most
-    frequent value.
-
-    Parameters:
-        x (pd.Series): Pandas Series to impute.
-        method (str): Imputation method for numerical data.
-            Allowed values are "mean" or "median".
-
-    Returns:
-        pd.Series: Series with missing values imputed.
-    """
+    """Impute missing values in a Series."""
     if x.dtype in ("float64", "int64"):
-        if method == "mean":
-            x = x.fillna(x.mean())
-        else:
-            x = x.fillna(x.median())
+        x = x.fillna(x.mean() if method == "mean" else x.median())
     else:
         x = x.fillna(x.mode()[0])
 
     return x
 
+
 def create_dummy_cols(df: pd.DataFrame, col: str) -> pd.DataFrame:
-    """Create dummy variables for a categorical column.
-
-    The original column is dropped and replaced with dummy variables.
-
-    Parameters:
-        df (pd.DataFrame): Input DataFrame.
-        col (str): Column name to be dummy encoded.
-
-    Returns:
-        pd.DataFrame: DataFrame with dummy variables added.
-    """
+    """Create dummy variables for a categorical column."""
     dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
     df = pd.concat([df, dummies], axis=1)
-    df = df.drop(columns=[col])
+    return df.drop(columns=[col])
 
-    return df
 
 # Load data
 def load_data(path: Path) -> pd.DataFrame:
@@ -98,39 +67,24 @@ def load_data(path: Path) -> pd.DataFrame:
 
 # Replace empty cells with nan
 
-def replace_empty_with_nan(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    """Replace empty string values with NaN for specified columns.
-
-    Parameters:
-        data (pd.DataFrame): Input DataFrame.
-        columns (list[str]): List of column names to clean.
-
-    Returns:
-        pd.DataFrame: DataFrame with empty strings replaced by NaN.
-    """
+def replace_empty_with_nan(
+    data: pd.DataFrame,
+    columns: list[str],
+) -> pd.DataFrame:
+    """Replace empty strings with NaN in specified columns."""
     for col in columns:
         data[col] = data[col].replace("", np.nan)
 
     return data
+
 
 # Drop all records with NA in the given variables
 def drop_rows_with_missing_values(
     data: pd.DataFrame,
     columns: list[str],
 ) -> pd.DataFrame:
-    """Drop rows with missing values in specified columns.
-
-    Parameters:
-        data (pd.DataFrame): Input DataFrame.
-        columns (list[str]): Columns to check for missing values.
-
-    Returns:
-        pd.DataFrame: DataFrame with rows removed where specified columns contain NA.
-    """
-    return data.dropna(
-        axis=0,
-        subset=columns,
-    )
+    """Drop rows with missing values in specified columns."""
+    return data.dropna(subset=columns)
 
 
 
@@ -139,49 +93,27 @@ def columns_to_object(
     data: pd.DataFrame,
     columns: list[str],
 ) -> pd.DataFrame:
-    """Change specified columns to object dtype.
-
-    Parameters:
-        data (pd.DataFrame): Input DataFrame.
-        columns (list[str]): Column names to change.
-
-    Returns:
-        pd.DataFrame: DataFrame with updated dtypes.
-    """
+    """Change specified columns to object dtype."""
     for col in columns:
         data[col] = data[col].astype("object")
 
     return data
+
 
 # Splitting con and cat
 
 def split_continuous_and_categorical(
     data: pd.DataFrame,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Split a DataFrame into continuous and categorical variables.
-
-    Continuous variables are columns with numeric dtypes (int, float).
-    Categorical variables are columns with object dtype.
-
-    Parameters:
-        data (pd.DataFrame): Input DataFrame.
-
-    Returns:
-        tuple[pd.DataFrame, pd.DataFrame]:
-            - Continuous variables DataFrame
-            - Categorical variables DataFrame
-    """
-    continuous_vars = data.loc[
+    """Split DataFrame into continuous and categorical variables."""
+    cont_vars = data.loc[
         :,
         (data.dtypes == "float64") | (data.dtypes == "int64"),
     ]
+    cat_vars = data.loc[:, data.dtypes == "object"]
 
-    categorical_vars = data.loc[
-        :,
-        data.dtypes == "object",
-    ]
+    return cont_vars, cat_vars
 
-    return continuous_vars, categorical_vars
 
 # Find outliers in continuous variables
 cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),

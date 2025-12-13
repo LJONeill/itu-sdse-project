@@ -28,7 +28,6 @@ COLUMNS_TO_DROP = [
     "visited_faq",
 ]
 
-
 COLUMNS_TO_CLEAN = [
     "lead_indicator",
     "lead_id",
