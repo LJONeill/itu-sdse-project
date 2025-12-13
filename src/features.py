@@ -73,41 +73,6 @@ def load_data(path: Path) -> pd.DataFrame:
     """Load data from CSV."""
     return pd.read_csv(path)
 
-# Replace empty cells with nan
-
-def replace_empty_with_nan(
-    data: pd.DataFrame,
-    columns: list[str],
-) -> pd.DataFrame:
-    """Replace empty strings with NaN in specified columns."""
-    for col in columns:
-        data[col] = data[col].replace("", np.nan)
-
-    return data
-
-
-# Drop all records with NA in the given variables
-def drop_rows_with_missing_values(
-    data: pd.DataFrame,
-    columns: list[str],
-) -> pd.DataFrame:
-    """Drop rows with missing values in specified columns."""
-    return data.dropna(subset=columns)
-
-
-
-# Change data types to object
-def columns_to_object(
-    data: pd.DataFrame,
-    columns: list[str],
-) -> pd.DataFrame:
-    """Change specified columns to object dtype."""
-    for col in columns:
-        data[col] = data[col].astype("object")
-
-    return data
-
-
 # Splitting con and cat
 
 def split_continuous_and_categorical(
@@ -210,20 +175,6 @@ def recombine_categorical_and_continuous(
     return pd.concat([cat_vars, cont_vars], axis=1)
 
 
-def store_data_and_columns(
-    data: pd.DataFrame,
-    columns_path: Path,
-    data_path: Path,
-) -> None:
-    """Store dataset columns and data to disk."""
-    data_columns = list(data.columns)
-
-    with open(columns_path, "w+") as f:
-        json.dump(data_columns, f)
-
-    data.to_csv(data_path, index=False)
-
-
 def bin_source_category(data: pd.DataFrame) -> pd.DataFrame:
     """Perform category binning for the source column."""
     data["bin_source"] = data["source"]
@@ -298,12 +249,6 @@ def main(
     # Load data
     data = load_data(input_path)
 
-    # Data cleaning (not sure this should be here?)
-
-    data = replace_empty_with_nan(data, COLUMNS_TO_CLEAN)
-    data = drop_rows_with_missing_values(data, COLUMNS_REQUIRED)
-    data = columns_to_object(data, COLUMNS_TO_OBJECT)
-
     data = bin_source_category(data)
 
     cont_vars, cat_vars = split_continuous_and_categorical(data)
@@ -346,12 +291,6 @@ def main(
     data = recombine_and_cast_to_float(
         other_vars,
         pd.DataFrame(),
-    )
-
-    store_data_and_columns(
-        data=data,
-        columns_path=COLUMN_DRIFT_PATH,
-        data_path=output_path,
     )
 
     save_features_data(

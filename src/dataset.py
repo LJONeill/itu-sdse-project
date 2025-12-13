@@ -89,6 +89,51 @@ def drop_columns(data, columns_to_drop):
         axis=1,
     )
 
+# Data cleaning
+
+def replace_empty_with_nan(
+    data: pd.DataFrame,
+    columns: list[str],
+) -> pd.DataFrame:
+    """Replace empty strings with NaN in specified columns."""
+    for col in columns:
+        data[col] = data[col].replace("", np.nan)
+
+    return data
+
+# Drop all records with NA in the given variables
+
+def drop_rows_with_missing_values(
+    data: pd.DataFrame,
+    columns: list[str],
+) -> pd.DataFrame:
+    """Drop rows with missing values in specified columns."""
+    return data.dropna(subset=columns)
+
+# Change data types to object
+def columns_to_object(
+    data: pd.DataFrame,
+    columns: list[str],
+) -> pd.DataFrame:
+    """Change specified columns to object dtype."""
+    for col in columns:
+        data[col] = data[col].astype("object")
+
+    return data
+
+def store_data_and_columns(
+    data: pd.DataFrame,
+    columns_path: Path,
+    data_path: Path,
+) -> None:
+    """Store dataset columns and data to disk."""
+    data_columns = list(data.columns)
+
+    with open(columns_path, "w+") as f:
+        json.dump(data_columns, f)
+
+    data.to_csv(data_path, index=False)
+
 # Docker main script
 @app.command()
 def main(
