@@ -17,7 +17,7 @@ from config import (
     INTERIM_DATA_DIR,
     MIN_DATE,
     MAX_DATE,
-    COLUMNS_TO_DROP,
+    ALL_COLUMNS_TO_DROP,
 )
 
 app = typer.Typer()
@@ -112,7 +112,7 @@ def main(
     store_date_limits(actual_min_date, actual_max_date)
 
     # Drop columns and save cleaned data
-    data = drop_columns(data, COLUMNS_TO_DROP)
+    data = drop_columns(data, ALL_COLUMNS_TO_DROP)
     data.to_csv(output_path, index=False)
 
     # MLflow tracking

@@ -37,7 +37,7 @@ ID_COLUMNS = [
     "date_part",
 ]
 
-
+ALL_COLUMNS_TO_DROP = ID_COLUMNS + COLUMNS_TO_DROP
 
 COLUMNS_TO_CLEAN = [
     "lead_indicator",
