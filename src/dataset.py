@@ -23,7 +23,7 @@ DATE_LIMITS_PATH: Path = INTERIM_DATA_DIR / "date_limits.json"
 # Load data
 
 def load_data(path: Path) -> pd.DataFrame:
-    """Load data from a CSV file located at the given path."""
+    """Load data from CSV."""
     return pd.read_csv(path)
 
 # Date limits
