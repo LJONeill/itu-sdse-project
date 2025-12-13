@@ -48,25 +48,6 @@ def define_dates(min_date, max_date):
 
     return min_date, max_date
 
-
-def define_dates(min_date, max_date):
-    """Define the date limits in datetime format."""
-
-    min_date = (
-        pd.to_datetime(min_date).date()
-        if min_date
-        else pd.to_datetime("2024-01-01").date()
-    )
-
-    max_date = (
-        pd.to_datetime(max_date).date()
-        if max_date
-        else pd.to_datetime(datetime.datetime.now().date()).date()
-    )
-
-    return min_date, max_date
-
-
 # Limit data 
 
 def filter_data_by_date (data, min_date, max_date):
