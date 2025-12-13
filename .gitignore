@@ -7,4 +7,3 @@
 # dvc files
 .dvc/tmp/
 .dvc/cache/
-notebooks/.DS_Store
