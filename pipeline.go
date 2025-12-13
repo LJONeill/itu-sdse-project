@@ -61,7 +61,7 @@ func repeated_config() {
 	//package/requirements downloads??
 
 	python := client.Container().From("python:3.12.2-bookworm").
-		WithDirectory("itu-forked-project", client.Host().Directory("mlops_sg")).
+		WithDirectory("itu-forked-project", client.Host().Directory("mlops_sg")). //we need to update mlops_sg in here too
 		WithExec([]string{"python", "repeated_config.py"})
 
 }
@@ -73,10 +73,18 @@ func data_pipeline() {
 	//only run if data is known to have been updated/changed
 	//contains data load/clean and feature manipulation
 
-	python := client.Container().From("python:3.12.2-bookworm").
-		WithDirectory("itu-forked-project", client.Host().Directory("mlops_sg")).
-		WithExec([]string{"python", "dataset.py"})
-
+	python := client.Container().
+		From("python:3.12.2-bookworm").
+		WithDirectory("itu-forked-project", client.Host().Directory(".")).
+		WithWorkdir("itu-forked-project").
+		WithExec([]string{ //not sure if anything continuing here is correct....
+			"bash", "-lc",
+			`
+            pip install dvc &&
+            dvc pull &&
+            dvc repro
+            `,
+		})
 }
 
 func machine_learning_pipeline() {
