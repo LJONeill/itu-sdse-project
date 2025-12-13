@@ -92,8 +92,8 @@ def drop_columns(data, columns_to_drop):
 # Docker main script
 @app.command()
 def main(
-    input_path: Path = RAW_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
+    input_path: Path = INPUT_PATH,#didnt specifcy data need to test if its working
+    output_path: Path = CLEANED_DATA_PATH, #I'd rather name this filtered
 ):
     """Run the data processing pipeline."""
 
@@ -120,7 +120,7 @@ def main(
         mlflow.log_param("min_date", str(actual_min_date))
         mlflow.log_param("max_date", str(actual_max_date))
         mlflow.log_artifact(output_path)
-        mlflow.log_artifact(date_limits_path)
+        mlflow.log_artifact(DATE_LIMITS_PATH)
 
     logger.success("Processing done")
 
