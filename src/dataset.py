@@ -29,14 +29,43 @@ def load_data(path: Path) -> pd.DataFrame:
 # Date limits
 
 def define_dates(min_date, max_date):
-    """Define the date limits in datetime format."""
-    if not max_date: # I am not sure it makes sense to have this check as the first line in the function?
-        max_date = pd.to_datetime(datetime.datetime.now().date()).date()
+    """Define the date limits in datetime format.
+
+    Checks whether min and max dates are provided. If not, max_date
+    defaults to today's date and min_date defaults to 2024-01-01.
+    """
+    if max_date is None:
+        max_date = pd.to_datetime(
+            datetime.datetime.now().date()
+        ).date()
     else:
         max_date = pd.to_datetime(max_date).date()
 
-    min_date = pd.to_datetime(min_date).date()
+    if min_date is not None:
+        min_date = pd.to_datetime(min_date).date()
+    else:
+        min_date = pd.to_datetime("2024-01-01").date()
+
     return min_date, max_date
+
+
+def define_dates(min_date, max_date):
+    """Define the date limits in datetime format."""
+
+    min_date = (
+        pd.to_datetime(min_date).date()
+        if min_date
+        else pd.to_datetime("2024-01-01").date()
+    )
+
+    max_date = (
+        pd.to_datetime(max_date).date()
+        if max_date
+        else pd.to_datetime(datetime.datetime.now().date()).date()
+    )
+
+    return min_date, max_date
+
 
 # Limit data 
 
