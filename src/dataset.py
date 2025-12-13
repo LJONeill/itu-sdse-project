@@ -10,13 +10,13 @@ import pandas as pd
 import mlflow
 
 from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, 
-from config import max_date, min_date
+from config import max_date, min_date #maybe change to capital? 
 
 # Config + paths
 
-input_path: Path = RAW_DATA_DIR / "raw_data.csv"
-cleaned_data_path: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
-date_limits_path: Path = INTERIM_DATA_DIR / "date_limits.json"
+INPUT_PATH: Path = RAW_DATA_DIR / "raw_data.csv" #constant should be capitalized
+CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
+DATE_LIMITS_PATH: Path = INTERIM_DATA_DIR / "date_limits.json"
 
 # Functions
 
