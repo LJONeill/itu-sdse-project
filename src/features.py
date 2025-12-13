@@ -16,7 +16,13 @@ from config import (
     INTERIM_DATA_DIR,
 )
 
+# Columns to clean
 
+COLUMNS_TO_CLEAN = [
+    "lead_indicator",
+    "lead_id",
+    "customer_code",
+]
 
 # Paths
 
@@ -98,16 +104,42 @@ def load_data(path: Path) -> pd.DataFrame:
     """Load data from CSV."""
     return pd.read_csv(path)
 
-# Fill variables with NA when record is empty for said variable
-data["lead_indicator"].replace("", np.nan, inplace=True)
-data["lead_id"].replace("", np.nan, inplace=True)
-data["customer_code"].replace("", np.nan, inplace=True)
+# Replace empty cells with nan
+
+def replace_empty_with_nan(data: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
+    """Replace empty string values with NaN for specified columns.
+
+    Parameters:
+        data (pd.DataFrame): Input DataFrame.
+        columns (list[str]): List of column names to clean.
+
+    Returns:
+        pd.DataFrame: DataFrame with empty strings replaced by NaN.
+    """
+    for col in columns:
+        data[col] = data[col].replace("", np.nan)
+
+    return data
 
 # Drop all records with NA in the given variables
-data = data.dropna(axis=0, subset=[
-    "lead_indicator",
-    "lead_id",
-    ])
+def drop_rows_with_missing_values(
+    data: pd.DataFrame,
+    columns: list[str],
+) -> pd.DataFrame:
+    """Drop rows with missing values in specified columns.
+
+    Parameters:
+        data (pd.DataFrame): Input DataFrame.
+        columns (list[str]): Columns to check for missing values.
+
+    Returns:
+        pd.DataFrame: DataFrame with rows removed where specified columns contain NA.
+    """
+    return data.dropna(
+        axis=0,
+        subset=columns,
+    )
+
 
 
 # Change data types to object

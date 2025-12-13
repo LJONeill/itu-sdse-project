@@ -17,6 +17,7 @@ from config import (
     INTERIM_DATA_DIR,
     MIN_DATE,
     MAX_DATE,
+    COLUMNS_TO_DROP,
 )
 
 app = typer.Typer()
@@ -27,19 +28,6 @@ INPUT_PATH: Path = RAW_DATA_DIR / "raw_data.csv" #constant should be capitalized
 CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
 DATE_LIMITS_PATH: Path = INTERIM_DATA_DIR / "date_limits.json"
 
-# This is a constant?
-
-COLUMNS_TO_DROP = [
-    "is_active",
-    "marketing_consent",
-    "first_booking",
-    "existing_customer",
-    "last_seen",
-    "domain",
-    "country",
-    "visited_learn_more_before_booking",
-    "visited_faq",
-]
 
 # Functions
 
