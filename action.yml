@@ -1,0 +1,15 @@
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install DVC
+        run: pip install dvc
+
+      - name: Check if pipeline is dirty
+        run: dvc repro --dry-run > dvc.txt
+
+      - name: Run pipeline
+        if: success() && hashFiles('dvc.txt') != ''
+        run: go run pipeline.go

@@ -1,0 +1,8 @@
+stages:
+  compute_date_limits:
+    cmd: python src/dataset.py
+    deps:
+      - data/raw/raw_data.csv
+      - src/dataset.py
+    outs:
+      - artifacts/date_limits.json
