@@ -39,3 +39,13 @@ COLUMNS_REQUIRED = [
     "lead_indicator",
     "lead_id",
 ]
+
+COLUMNS_TO_OBJECT = [
+    "lead_id",
+    "lead_indicator",
+    "customer_group",
+    "onboarding",
+    "source",
+    "customer_code",
+]
+

@@ -16,14 +16,6 @@ from config import (
     INTERIM_DATA_DIR,
 )
 
-# Columns to clean
-
-COLUMNS_TO_CLEAN = [
-    "lead_indicator",
-    "lead_id",
-    "customer_code",
-]
-
 # Paths
 
 # Processed data paths
@@ -143,21 +135,53 @@ def drop_rows_with_missing_values(
 
 
 # Change data types to object
-vars = [
-    "lead_id", 
-    "lead_indicator", 
-    "customer_group", 
-    "onboarding", 
-    "source", 
-    "customer_code"
-]
+def columns_to_object(
+    data: pd.DataFrame,
+    columns: list[str],
+) -> pd.DataFrame:
+    """Change specified columns to object dtype.
 
-for col in vars:
-    data[col] = data[col].astype("object")
+    Parameters:
+        data (pd.DataFrame): Input DataFrame.
+        columns (list[str]): Column names to change.
 
-# Seperate variables into continuous and categorical
-cont_vars = data.loc[:, ((data.dtypes=="float64")|(data.dtypes=="int64"))]
-cat_vars = data.loc[:, (data.dtypes=="object")]
+    Returns:
+        pd.DataFrame: DataFrame with updated dtypes.
+    """
+    for col in columns:
+        data[col] = data[col].astype("object")
+
+    return data
+
+# Splitting con and cat
+
+def split_continuous_and_categorical(
+    data: pd.DataFrame,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Split a DataFrame into continuous and categorical variables.
+
+    Continuous variables are columns with numeric dtypes (int, float).
+    Categorical variables are columns with object dtype.
+
+    Parameters:
+        data (pd.DataFrame): Input DataFrame.
+
+    Returns:
+        tuple[pd.DataFrame, pd.DataFrame]:
+            - Continuous variables DataFrame
+            - Categorical variables DataFrame
+    """
+    continuous_vars = data.loc[
+        :,
+        (data.dtypes == "float64") | (data.dtypes == "int64"),
+    ]
+
+    categorical_vars = data.loc[
+        :,
+        data.dtypes == "object",
+    ]
+
+    return continuous_vars, categorical_vars
 
 # Find outliers in continuous variables
 cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),
