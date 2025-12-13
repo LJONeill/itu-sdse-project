@@ -279,8 +279,6 @@ def save_features_data(
 #Docker main script:
 
 @app.command() 
-"""Does so the the functions inside main can be run indepedently from the terminal
-Good for testing..."""
 def main(
     input_path: Path = RAW_DATA_DIR / "dataset.csv",
     output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
