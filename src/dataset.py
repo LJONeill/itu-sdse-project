@@ -18,6 +18,20 @@ INPUT_PATH: Path = RAW_DATA_DIR / "raw_data.csv" #constant should be capitalized
 CLEANED_DATA_PATH: Path = PROCESSED_DATA_DIR / "cleaned_data.csv"
 DATE_LIMITS_PATH: Path = INTERIM_DATA_DIR / "date_limits.json"
 
+# This is a constant?
+
+COLUMNS_TO_DROP = [
+    "is_active",
+    "marketing_consent",
+    "first_booking",
+    "existing_customer",
+    "last_seen",
+    "domain",
+    "country",
+    "visited_learn_more_before_booking",
+    "visited_faq",
+]
+
 # Functions
 
 # Load data
@@ -58,32 +72,26 @@ def filter_data_by_date (data, min_date, max_date):
 # Storing dates
 
 def store_date_limits(min_date, max_date):
+    """Store min and max date limits as a JSON file."""
+
     date_limits = {
         "min_date": str(min_date),
-        "max_date": str(max_date)
+        "max_date": str(max_date),
     }
-    
+
     with open(date_limits_path, "w") as f:
-    json.dump(date_limits, f)
+        json.dump(date_limits, f)
 
 # Drop columns from data
 
 def drop_columns(data, columns_to_drop):
-    data = data.drop(
-    [
-     "is_active", 
-     "marketing_consent", 
-     "first_booking", 
-     "existing_customer", 
-     "last_seen", 
-     "domain", 
-     "country", 
-     "visited_learn_more_before_booking", 
-     "visited_faq"
-     ],
-    axis=1
+    """Drop specified columns from the dataset."""
+
+    return data.drop(
+        columns=columns_to_drop,
+        axis=1,
     )
-    return data
+
 
 
 # Docker main script
