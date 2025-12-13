@@ -16,6 +16,8 @@ FIGURES_DIR = REPORTS_DIR / "figures"
 MAX_DATE = "2024-01-31"
 MIN_DATE = "2024-01-01"
 
+# ot useful features
+
 COLUMNS_TO_DROP = [
     "is_active",
     "marketing_consent",
@@ -27,6 +29,15 @@ COLUMNS_TO_DROP = [
     "visited_learn_more_before_booking",
     "visited_faq",
 ]
+
+# identifiers / leakage
+ID_COLUMNS = [
+    "lead_id",
+    "customer_code",
+    "date_part",
+]
+
+
 
 COLUMNS_TO_CLEAN = [
     "lead_indicator",

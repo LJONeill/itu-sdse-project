@@ -116,18 +116,44 @@ def split_continuous_and_categorical(
 
 
 # Find outliers in continuous variables
-cont_vars = cont_vars.apply(lambda x: x.clip(lower = (x.mean()-2*x.std()),
-                                             upper = (x.mean()+2*x.std())))
 
-outlier_summary = cont_vars.apply(describe_numeric_col).T
-outlier_summary.to_csv(outlier_summary_path)
+def handle_continuous_outliers(
+    cont_vars: pd.DataFrame,
+    summary_path: Path,
+) -> pd.DataFrame:
+    """Clipping outliers in continuous variables and saving a summary."""
+    cont_vars = cont_vars.apply(
+        lambda x: x.clip(
+            lower=x.mean() - 2 * x.std(),
+            upper=x.mean() + 2 * x.std(),
+        )
+    )
 
-# Save categorical variables prior to imputation
-cat_missing_impute = cat_vars.mode(numeric_only=False, dropna=True)
-cat_missing_impute.to_csv(cat_missing_impute_path)
+    outlier_summary = cont_vars.apply(describe_numeric_col).T
+    outlier_summary.to_csv(summary_path)
 
-# Perform imputation on continuous variables
-cont_vars = cont_vars.apply(impute_missing_values)
+    return cont_vars
+
+def save_categorical_imputation_values(
+    cat_vars: pd.DataFrame,
+    output_path: Path,
+) -> pd.DataFrame:
+    """Saving values for categorical variables before imputation."""
+    cat_missing_impute = cat_vars.mode(
+        numeric_only=False,
+        dropna=True,
+    )
+    cat_missing_impute.to_csv(output_path)
+
+    return cat_missing_impute
+
+# imputation on continues variables
+
+def impute_continueus_variables(
+    cont_vars: pd.DataFrame,
+) -> pd.DataFrame:
+    """Impute missing values in continuous variables."""
+    return cont_vars.apply(impute_missing_values)
 
 # Change customer code from NA to None, then impute all categorical variables
 cat_vars.loc[cat_vars['customer_code'].isna(),'customer_code'] = 'None'
