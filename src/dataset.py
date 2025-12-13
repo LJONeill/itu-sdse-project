@@ -8,9 +8,18 @@ import json
 # Third-party libraries
 import pandas as pd
 import mlflow
+import typer
+from loguru import logger
 
-from config import PROCESSED_DATA_DIR, RAW_DATA_DIR, INTERIM_DATA_DIR, 
-from config import max_date, min_date #maybe change to capital? 
+from config import (
+    PROCESSED_DATA_DIR,
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    MIN_DATE,
+    MAX_DATE,
+)
+
+app = typer.Typer()
 
 # Config + paths
 
@@ -92,35 +101,44 @@ def drop_columns(data, columns_to_drop):
         axis=1,
     )
 
-
-
 # Docker main script
 @app.command()
 def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
     input_path: Path = RAW_DATA_DIR / "dataset.csv",
     output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    # ----------------------------------------------
 ):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
-    logger.info("Processing dataset...")
-    for i in tqdm(range(10), total=10):
-        if i == 5:
-            logger.info("Something happened for iteration 5.")
-    logger.success("Processing dataset complete.")
-    # -----------------------------------------
+    """Run the data processing pipeline."""
+
+    logger.info("Processing started")
+
+    # Load data
+    data = load_data(input_path)
+
+    # Define and apply date limits
+    parsed_min_date, parsed_max_date = define_dates(min_date, max_date)
+    data = filter_data_by_date(data, parsed_min_date, parsed_max_date)
+
+    # Store actual date limits
+    actual_min_date = data["date_part"].min()
+    actual_max_date = data["date_part"].max()
+    store_date_limits(actual_min_date, actual_max_date)
+
+    # Drop columns and save cleaned data
+    data = drop_columns(data, COLUMNS_TO_DROP)
+    data.to_csv(output_path, index=False)
+
+    # MLflow tracking
+    with mlflow.start_run():
+        mlflow.log_param("min_date", str(actual_min_date))
+        mlflow.log_param("max_date", str(actual_max_date))
+        mlflow.log_artifact(output_path)
+        mlflow.log_artifact(date_limits_path)
+
+    logger.success("Processing done")
 
 
 if __name__ == "__main__":
     app()
 
-
-#Mlflow
-
-with mlflow.start_run():
-    mlflow.log_param("min_date", str(min_date))
-    mlflow.log_param("max_date", str(max_date))
-    mlflow.log_artifact(cleaned_data_path)
-    mlflow.log_artifact(date_limits_path)
 
 
