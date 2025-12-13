@@ -12,7 +12,6 @@ import joblib
 
 from config import (
     PROCESSED_DATA_DIR,
-    RAW_DATA_DIR,
     INTERIM_DATA_DIR,
     COLUMNS_TO_CLEAN,
     COLUMNS_REQUIRED,
@@ -280,8 +279,8 @@ def save_features_data(
 
 @app.command() 
 def main(
-    input_path: Path = RAW_DATA_DIR / "dataset.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
+    input_path: Path = CLEANED_DATA_PATH, #still think it should be filtered
+    output_path: Path = TRAINING_GOLD_PATH,
 ):
     """Run the data processing pipeline."""
 
