@@ -292,6 +292,9 @@ def main(
 
     logger.info("Processing started")
 
+    # Load data
+    data = load_data(input_path)
+
         # MLflow tracking
     with mlflow.start_run():
         mlflow.log_param()
