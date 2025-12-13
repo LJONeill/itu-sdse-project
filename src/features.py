@@ -155,60 +155,122 @@ def impute_continueus_variables(
     """Impute missing values in continuous variables."""
     return cont_vars.apply(impute_missing_values)
 
-# Change customer code from NA to None, then impute all categorical variables
-cat_vars.loc[cat_vars['customer_code'].isna(),'customer_code'] = 'None'
-cat_vars = cat_vars.apply(impute_missing_values)
+# Imputation on categorical variables
+
+def impute_categorical_variables(
+    cat_vars: pd.DataFrame,
+    customer_code_col: str = "customer_code",
+) -> pd.DataFrame:
+    """Impute missing values in categorical variables."""
+    cat_vars = cat_vars.copy()
+    cat_vars.loc[cat_vars[customer_code_col].isna(), customer_code_col] = "None"
+
+    return cat_vars.apply(impute_missing_values)
+
 
 # Make and save scaler for continuous variables
-scaler = MinMaxScaler()
-scaler.fit(cont_vars)
-joblib.dump(value=scaler, filename=scaler_path)
 
-# Perform scaling on continuous variables
-cont_vars = pd.DataFrame(scaler.transform(cont_vars), columns=cont_vars.columns)
+def scaler( #needs another name
+    cont_vars: pd.DataFrame,
+    scaler_path: Path,
+) -> MinMaxScaler:
+    """Fit a MinMaxScaler on continuous variables and save it."""
+    scaler = MinMaxScaler()
+    scaler.fit(cont_vars)
+    joblib.dump(scaler, scaler_path)
 
-# Recombine categorical and continuous data
-cont_vars = cont_vars.reset_index(drop=True)
-cat_vars = cat_vars.reset_index(drop=True)
-data = pd.concat([cat_vars, cont_vars], axis=1)
+    return scaler
 
-# Store variables and data
-data_columns = list(data.columns)
-with open(column_drift_path,'w+') as f:           
-    json.dump(data_columns,f)
-    
-data.to_csv(training_data_path, index=False)
+def scale_continuous_variables( #should this be a function on its own or just a part of the main flow? 
+    cont_vars: pd.DataFrame,
+    scaler: MinMaxScaler,
+) -> pd.DataFrame:
+    """Scale continuous variables."""
+    return pd.DataFrame(
+        scaler.transform(cont_vars),
+        columns=cont_vars.columns,
+    )
 
-# Perform category binning
-data['bin_source'] = data['source']
-values_list = ['li', 'organic','signup','fb']
-data.loc[~data['source'].isin(values_list),'bin_source'] = 'Others'
-mapping = {'li' : 'socials', 
-           'fb' : 'socials', 
-           'organic': 'group1', 
-           'signup': 'group1'
-           }
+def recombine_categorical_and_continuous(
+    cat_vars: pd.DataFrame,
+    cont_vars: pd.DataFrame,
+) -> pd.DataFrame:
+    """Recombine categorical and continuous variables."""
+    cont_vars = cont_vars.reset_index(drop=True)
+    cat_vars = cat_vars.reset_index(drop=True)
 
-data['bin_source'] = data['source'].map(mapping)
+    return pd.concat([cat_vars, cont_vars], axis=1)
+
+
+def store_data_and_columns(
+    data: pd.DataFrame,
+    columns_path: Path,
+    data_path: Path,
+) -> None:
+    """Store dataset columns and data to disk."""
+    data_columns = list(data.columns)
+
+    with open(columns_path, "w+") as f:
+        json.dump(data_columns, f)
+
+    data.to_csv(data_path, index=False)
+
+
+def bin_source_category(data: pd.DataFrame) -> pd.DataFrame:
+    """Perform category binning for the source column."""
+    data["bin_source"] = data["source"]
+
+    values_list = ["li", "organic", "signup", "fb"]
+    data.loc[~data["source"].isin(values_list), "bin_source"] = "Others"
+
+    mapping = {
+        "li": "socials",
+        "fb": "socials",
+        "organic": "group1",
+        "signup": "group1",
+    }
+
+    data["bin_source"] = data["source"].map(mapping)
+
+    return data
+
 
 # Drop columns
-data = data.drop(["lead_id", "customer_code", "date_part"], axis=1)
+#data = data.drop(["lead_id", "customer_code", "date_part"], axis=1)
+# I decided this should be moved to dataset.py, no reason to drop columns twice
 
-# One hot encode categorical variables
-cat_cols = ["customer_group", "onboarding", "bin_source", "source"]
-cat_vars = data[cat_cols]
+def one_hot_encode_categorical_variables(
+    data: pd.DataFrame,
+    cat_cols: list[str],
+) -> pd.DataFrame:
+    """One-hot encode specified categorical columns."""
+    cat_vars = data[cat_cols]
+    other_vars = data.drop(cat_cols, axis=1)
 
-other_vars = data.drop(cat_cols, axis=1)
+    for col in cat_vars:
+        cat_vars[col] = cat_vars[col].astype("category")
+        cat_vars = create_dummy_cols(cat_vars, col)
 
-for col in cat_vars:
-    cat_vars[col] = cat_vars[col].astype("category")
-    cat_vars = create_dummy_cols(cat_vars, col)
+    return pd.concat([other_vars, cat_vars], axis=1)
+
 
 # Reconcatenate continuous and one hot encoded variables
-data = pd.concat([other_vars, cat_vars], axis=1)
+def recombine_and_cast_to_float(
+    other_vars: pd.DataFrame,
+    cat_vars: pd.DataFrame,
+) -> pd.DataFrame:
+    """Recombine variables and cast all columns to float."""
+    data = pd.concat([other_vars, cat_vars], axis=1)
 
-for col in data:
-    data[col] = data[col].astype("float64")
+    for col in data:
+        data[col] = data[col].astype("float64")
 
-# Write out features data
-data.to_csv(training_gold_path, index=False)
+    return data
+
+
+def save_features_data(
+    data: pd.DataFrame,
+    output_path: Path,
+) -> None:
+    """Save feature dataset to CSV."""
+    data.to_csv(output_path, index=False)

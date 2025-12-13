@@ -59,3 +59,8 @@ COLUMNS_TO_OBJECT = [
     "customer_code",
 ]
 
+CAT_COLUMNS = ["customer_group", 
+               "onboarding", 
+               "bin_source", 
+               "source",
+]
