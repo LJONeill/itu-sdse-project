@@ -18,6 +18,10 @@ from config import (
     MIN_DATE,
     MAX_DATE,
     ALL_COLUMNS_TO_DROP,
+    COLUMNS_TO_CLEAN,
+    COLUMNS_REQUIRED,
+    COLUMNS_TO_OBJECT,
+)
 )
 
 app = typer.Typer()
@@ -148,7 +152,7 @@ def main(
     data = load_data(input_path)
 
     # Define and apply date limits
-    parsed_min_date, parsed_max_date = define_dates(min_date, max_date)
+    parsed_min_date, parsed_max_date = define_dates(MIN_DATE, MAX_DATE)
     data = filter_data_by_date(data, parsed_min_date, parsed_max_date)
 
     # Store actual date limits

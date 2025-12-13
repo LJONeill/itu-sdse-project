@@ -19,9 +19,6 @@ from config import (
     CLEANED_DATA_PATH,
     TRAINING_GOLD_PATH,
     SCALER_PATH,
-    COLUMNS_TO_CLEAN,
-    COLUMNS_REQUIRED,
-    COLUMNS_TO_OBJECT,
 )
 
 # Paths
