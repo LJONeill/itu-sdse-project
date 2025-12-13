@@ -274,3 +274,26 @@ def save_features_data(
 ) -> None:
     """Save feature dataset to CSV."""
     data.to_csv(output_path, index=False)
+
+
+#Docker main script:
+
+@app.command()
+def main(
+    input_path: Path = RAW_DATA_DIR / "dataset.csv",
+    output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
+):
+    """Run the data processing pipeline."""
+
+    logger.info("Processing started")
+
+        # MLflow tracking
+    with mlflow.start_run():
+        mlflow.log_param()
+        mlflow.log_artifact()
+
+    logger.success("Processing done")
+
+
+if __name__ == "__main__":
+    app()
