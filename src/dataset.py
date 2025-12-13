@@ -23,7 +23,6 @@ from config import (
     COLUMNS_REQUIRED,
     COLUMNS_TO_OBJECT,
 )
-)
 
 app = typer.Typer()
 
@@ -164,6 +163,17 @@ def main(
     # Drop columns and save cleaned data
     data = drop_columns(data, ALL_COLUMNS_TO_DROP)
     data.to_csv(output_path, index=False)
+
+    # Data cleaning (should come after dropping right?)
+    data = replace_empty_with_nan(data, COLUMNS_TO_CLEAN,)
+    data = drop_rows_with_missing_values(data, COLUMNS_REQUIRED,)
+    data = columns_to_object(data, COLUMNS_TO_OBJECT,)
+
+    store_data_and_columns(
+        data=data,
+        columns_path=INTERIM_DATA_DIR / "cleaned_columns.json",
+        data_path=output_path,
+    )
 
     # MLflow tracking
     with mlflow.start_run():
