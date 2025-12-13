@@ -33,48 +33,70 @@ COLUMN_DRIFT_PATH: Path = INTERIM_DATA_DIR / "columns_drift.json"
 # External artifacts
 SCALER_PATH: Path = EXTERNAL_DATA_DIR / "scaler.pkl"
 
-# Define functions
-def describe_numeric_col(x):
-    """Returns descriptive statistics of given variable column
+
+
+def describe_numeric_col(x: pd.Series) -> pd.Series:
+    """Return descriptive statistics for a numeric pandas Series.
+
     Parameters:
-        x (pd.Series): Pandas col to describe.
-    Output:
-        y (pd.Series): Pandas series with descriptive stats. 
+        x (pd.Series): Pandas Series to describe.
+
+    Returns:
+        pd.Series: Descriptive statistics including count, missing values,
+        mean, min, and max.
     """
     return pd.Series(
         [x.count(), x.isnull().sum(), x.mean(), x.min(), x.max()],
-        index=["Count", "Missing", "Mean", "Min", "Max"]
+        index=["Count", "Missing", "Mean", "Min", "Max"],
     )
 
-def impute_missing_values(x, method="mean"):
-    """ Returns most frequent value if variable is non-numerical
-        Returns mean or median as denoted by method parameter for numerical variable
+def impute_missing_values(x: pd.Series, method: str = "mean") -> pd.Series:
+    """Impute missing values in a pandas Series.
+
+    For numerical variables, imputes the mean or median based on the
+    specified method. For non-numerical variables, imputes the most
+    frequent value.
 
     Parameters:
-        x (pd.Series): Pandas col to describe.
-        method (str): Values: "mean", "median"
+        x (pd.Series): Pandas Series to impute.
+        method (str): Imputation method for numerical data.
+            Allowed values are "mean" or "median".
+
+    Returns:
+        pd.Series: Series with missing values imputed.
     """
-    if (x.dtype == "float64") | (x.dtype == "int64"):
-        x = x.fillna(x.mean()) if method=="mean" else x.fillna(x.median())
+    if x.dtype in ("float64", "int64"):
+        if method == "mean":
+            x = x.fillna(x.mean())
+        else:
+            x = x.fillna(x.median())
     else:
         x = x.fillna(x.mode()[0])
+
     return x
 
-def create_dummy_cols(df, col):
-    """Return a new Pandas Dataframe, 
-    containing duplicates of every column except the given column
-    
+def create_dummy_cols(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Create dummy variables for a categorical column.
+
+    The original column is dropped and replaced with dummy variables.
+
     Parameters:
-        df (pd.Dataframe): Pandas df
-        col (pd.Dataframe.column): Pandas col, subset of df
+        df (pd.DataFrame): Input DataFrame.
+        col (str): Column name to be dummy encoded.
+
+    Returns:
+        pd.DataFrame: DataFrame with dummy variables added.
     """
-    df_dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
-    new_df = pd.concat([df, df_dummies], axis=1)
-    new_df = new_df.drop(col, axis=1)
-    return new_df
+    dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
+    df = pd.concat([df, dummies], axis=1)
+    df = df.drop(columns=[col])
+
+    return df
 
 # Load data
-data = pd.read_csv(cleaned_data_path)
+def load_data(path: Path) -> pd.DataFrame:
+    """Load data from CSV."""
+    return pd.read_csv(path)
 
 # Fill variables with NA when record is empty for said variable
 data["lead_indicator"].replace("", np.nan, inplace=True)
