@@ -26,7 +26,7 @@ def describe_numeric_col(x):
         y (pd.Series): Pandas series with descriptive stats. 
     """
     return pd.Series(
-        [x.count(), x.isnull().count(), x.mean(), x.min(), x.max()],
+        [x.count(), x.isnull().sum(), x.mean(), x.min(), x.max()],
         index=["Count", "Missing", "Mean", "Min", "Max"]
     )
 
