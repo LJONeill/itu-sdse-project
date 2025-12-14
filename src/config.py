@@ -15,7 +15,6 @@ EXTERNAL_DATA_DIR = DATA_DIR / "external"
 # External data
 SCALER_PATH = EXTERNAL_DATA_DIR / "scaler.pkl"
 
-
 MODELS_DIR = PROJ_ROOT / "models"
 REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
@@ -26,7 +25,14 @@ RANDOM_STATE = 42
 MAX_DATE = "2024-01-31"
 MIN_DATE = "2024-01-01"
 
-# ot useful features
+SOURCE_COLUMN = "source"
+SOURCE_VALUE = "signup"
+
+TARGET_COLUMN = "lead_indicator"
+
+# Columns to drop
+"""Columns that are not relevant for modelling and dropped earlier
+in the notebook but never added back or used in downstream tasks"""
 
 COLUMNS_TO_DROP = [
     "is_active",
@@ -38,39 +44,29 @@ COLUMNS_TO_DROP = [
     "country",
     "visited_learn_more_before_booking",
     "visited_faq",
-]
-
-# identifiers / leakage
-ID_COLUMNS = [
-    "lead_id",
-    "customer_code",
-    "date_part",
-]
-
-ALL_COLUMNS_TO_DROP = ID_COLUMNS + COLUMNS_TO_DROP
-
-COLUMNS_TO_CLEAN = [
     "lead_indicator",
     "lead_id",
     "customer_code",
+    "date_part"
 ]
 
-COLUMNS_REQUIRED = [
+# Columns for data validations
+
+VALIDATION_COLUMNS = [
     "lead_indicator",
     "lead_id",
+    "customer_code",
 ]
 
 COLUMNS_TO_OBJECT = [
-    "lead_id",
-    "lead_indicator",
     "customer_group",
     "onboarding",
     "source",
-    "customer_code",
 ]
 
-CAT_COLUMNS = ["customer_group", 
-               "onboarding", 
-               "bin_source", 
-               "source",
+CAT_COLUMNS = [
+    "customer_group", 
+    "onboarding", 
+    "bin_source", 
+    "source",
 ]
