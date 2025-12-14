@@ -1,1 +1,10 @@
-mlops-sg/.vscode/settings.json
+# Local files
+.DS_Store
+**/.DS_Store
+
+# VScode
+.vscode/
+
+# dvc files
+.dvc/tmp/
+.dvc/cache/
