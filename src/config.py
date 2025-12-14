@@ -21,6 +21,8 @@ REPORTS_DIR = PROJ_ROOT / "reports"
 FIGURES_DIR = REPORTS_DIR / "figures"
 
 # Variables
+
+RANDOM_STATE = 42
 MAX_DATE = "2024-01-31"
 MIN_DATE = "2024-01-01"
 
