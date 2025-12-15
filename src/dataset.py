@@ -12,7 +12,7 @@ import mlflow
 import typer
 from loguru import logger
 
-from src.config import (
+from config import (
     PROCESSED_DATA_DIR,
     RAW_DATA_DIR,
     INTERIM_DATA_DIR,
@@ -207,3 +207,5 @@ def main(
 
     logger.success("Processing done")
 
+if __name__ == "__main__":
+    app()
