@@ -49,7 +49,7 @@ func Build(ctx context.Context) error {
 	
 	fmt.Println("requirements installed")
 
-	config := require.WithExec([]string{"python", "config.py"})
+	config = require.WithExec([]string{"python", "config.py"})
 	_, err = config.Stdout(ctx)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("config.py ran")
 
-	data := config.WithExec([]string{"python", "dataset.py"})
+	data = config.WithExec([]string{"python", "dataset.py"})
 	_, err = data.Stdout(ctx)
 	if err != nil {
 		return err
