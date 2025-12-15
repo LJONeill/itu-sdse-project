@@ -49,7 +49,6 @@ COLUMNS_TO_DROP = [
     "country",
     "visited_learn_more_before_booking",
     "visited_faq",
-    "lead_indicator",
     "lead_id",
     "customer_code",
     "date_part"
@@ -64,10 +63,12 @@ VALIDATION_COLUMNS = [
 ]
 
 COLUMNS_TO_OBJECT = [
+    "lead_indicator",
     "customer_group",
     "onboarding",
     "source",
 ]
+
 
 CAT_COLUMNS = [
     "customer_group", 
@@ -75,3 +76,15 @@ CAT_COLUMNS = [
     "bin_source", 
     "source",
 ]
+
+
+SOURCE_BIN_VALUES = ["li", "organic", "signup", "fb"]
+
+SOURCE_BIN_MAPPING = {
+    "li": "socials",
+    "fb": "socials",
+    "organic": "group1",
+    "signup": "group1",
+}
+
+BIN_SOURCE_COLUMN = "bin_source"
