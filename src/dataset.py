@@ -12,7 +12,7 @@ import mlflow
 import typer
 from loguru import logger
 
-from src.config import (
+from config import (
     PROCESSED_DATA_DIR,
     RAW_DATA_DIR,
     INTERIM_DATA_DIR,
@@ -69,7 +69,23 @@ def filter_data_by_date(
         & (data["date_part"] <= max_date)
     ]
 
-
+def store_date_limits(
+    min_date,
+    max_date,
+    output_path: Path = DATE_LIMITS_PATH,
+) -> None:
+    """
+    Store the applied minimum and maximum date limits
+    as a JSON artifact for reproducibility.
+    """
+    date_limits = {
+        "min_date": str(min_date),
+        "max_date": str(max_date),
+    }
+ 
+    with open(output_path, "w") as f:
+        json.dump(date_limits, f, indent=2)
+        
 # Data cleaning
 
 # Drop rows with missing values for given columns
@@ -191,3 +207,5 @@ def main(
 
     logger.success("Processing done")
 
+if __name__ == "__main__":
+    app()

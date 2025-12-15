@@ -17,5 +17,3 @@ scipy==1.16.3
 sklearn-preprocessing==0.1.0
 typer==0.20.0
 xgboost==3.1.2
-pip==25.
--e .
