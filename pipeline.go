@@ -25,22 +25,39 @@ func Build(ctx context.Context) error {
 	}
 	defer client.Close()
 
-	python := client.Container().From("python:3.12.2-bookworm").
-		WithDirectory("py_files", client.Host().Directory("src")).
+	// Mirror the root of our repository
+	itu_sdse_project := client.Host().Directory(".")
+
+	// Before running any py files, install requirements
+	require := client.Container().From("python:3.12.2-bookworm").
+		WithDirectory("/repo", itu_sdse_project).
+		WithWorkdir("/repo/src").
 		WithExec([]string{"python", "--version"})
 
-	python = python.WithExec([]string{"python", "py_files/config.py"})
-
-	_, err = python.
-		Directory("output"). // Before writing to this folder, we may have to make sure it exists, 'os.makedirs('output', exist_ok=True)' 
-		Export(ctx, "output") //the exist_ok=True makes nothing happen if it already exists
+	require = require.WithExec([]string{
+		"bash", "-lc",
+		"pip install --upgrade pip",
+	})
+	
+		require = require.WithExec([]string{
+		"bash", "-lc",
+		"python -m pip install -r /repo/requirements.txt",
+	})
+	_, err = require.Stdout(ctx)
 	if err != nil {
 		return err
 	}
 
-	data := client.Container().From("python:3.12.2-bookworm").
-		WithDirectory("py_files", client.Host().Directory("src")).
-		WithExec([]string{"python", "py_files/dataset.py"})
+	python := require.WithExec([]string{"python", "config.py"})
+
+	_, err = python.
+		Directory("output"). 
+		Export(ctx, "output")
+	if err != nil {
+		return err
+	}
+
+	data := require.WithExec([]string{"python", "dataset.py"})
 
 	//data = data.WWithExec([]string{"python", "features.py"})
 
