@@ -1,5 +1,10 @@
 from pathlib import Path
 
+import os
+
+# Make the folder for the docker container storage within dagger pipeline
+os.makedirs("output", exist_ok=True)
+
 # Paths
 PROJ_ROOT = Path(__file__).resolve().parents[1]
 
