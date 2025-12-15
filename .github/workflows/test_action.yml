@@ -1,0 +1,30 @@
+name: Run Dagger pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  dagger:
+    name: Run Dagger pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.25.4
+          cache: false
+
+      - name: Run Dagger pipeline
+        uses: dagger/dagger-for-github@v8.2.0
+        with:
+          workdir: go
+          verb: run
+          args: go run pipeline.go
+          version: "0.19.6"
