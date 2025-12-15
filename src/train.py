@@ -2,7 +2,7 @@ from pathlib import Path
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import classification_report, f1_score
 from sklearn.linear_model import LogisticRegression
-from config import MODELS_DIR, PROCESSED_DATA_DIR, RANDOM_STATE
+from config import MODELS_DIR, PROCESSED_DATA_DIR, RANDOM_STATE, TARGET_COLUMN
 from xgboost import XGBRFClassifier
 from scipy.stats import uniform, randint
 from dataset import load_data
@@ -35,7 +35,7 @@ class lr_wrapper(mlflow.pyfunc.PythonModel):
 # Defined functions
 def separate_feats_labels(
         data: pd.DataFrame, 
-        labels_column: str = "lead_indicator",
+        labels_column: str = TARGET_COLUMN,
         ):
     '''Identify labels column to separate features data from labels data'''
     y = data[labels_column]
@@ -56,8 +56,8 @@ def perform_train_test_split(X, y, random_state=RANDOM_STATE, test_size=0.15):
 
 def prepare_data_for_models(data: pd.DataFrame):
 
-    X, y = separate_feats_labels()
-    return perform_train_test_split()
+    X, y = separate_feats_labels(data=data)
+    return perform_train_test_split(X=X, y=y)
 
 def setup_grid_search(
         model_class_choice: Literal["xgboost", "lr"],
@@ -87,6 +87,7 @@ def setup_grid_search(
     
 def make_model_predictions(
         model_results: dict,
+        data,
         model_class_choice: Literal["xgboost", "lr"] = "lr",
         ):
 
@@ -97,7 +98,7 @@ def make_model_predictions(
     else:
         print(error_mcc)
 
-    X_train, X_test, y_train, y_test = prepare_data_for_models()
+    X_train, X_test, y_train, y_test = prepare_data_for_models(data=data)
 
     model_grid = setup_grid_search(model_class_choice=model_class_choice)
 
@@ -111,6 +112,8 @@ def make_model_predictions(
 
 def train_and_save_model(
         model_class_choice: Literal["xgboost", "lr"],
+        model_results: dict,
+        data,
         ):
     if model_class_choice == "xgboost":
         model_path = xgboost_model_path
@@ -121,7 +124,7 @@ def train_and_save_model(
 
     with mlflow.start_run(experiment_id=experiment_id) as run:
 
-        model_grid, model_results, X_test, y_test = make_model_predictions()
+        model_grid, model_results, X_test, y_test = make_model_predictions(model_results=model_results, data=data)
 
         best_model = model_grid.best_estimator_
 
@@ -174,8 +177,17 @@ data = load_data(data_gold_path)
 #initialise results dictionary
 model_results = dict()
 
-train_and_save_model("xgboost")
-train_and_save_model("lr")
+train_and_save_model(
+    "xgboost", 
+    model_results=model_results,
+    data=data,
+    )
+
+train_and_save_model(
+    "lr", 
+    model_results=model_results,
+    data=data,
+    )
 
 # Store model results
 with open(model_results_path, 'w+') as results_file:
