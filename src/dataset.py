@@ -69,7 +69,23 @@ def filter_data_by_date(
         & (data["date_part"] <= max_date)
     ]
 
-
+def store_date_limits(
+    min_date,
+    max_date,
+    output_path: Path = DATE_LIMITS_PATH,
+) -> None:
+    """
+    Store the applied minimum and maximum date limits
+    as a JSON artifact for reproducibility.
+    """
+    date_limits = {
+        "min_date": str(min_date),
+        "max_date": str(max_date),
+    }
+ 
+    with open(output_path, "w") as f:
+        json.dump(date_limits, f, indent=2)
+        
 # Data cleaning
 
 # Drop rows with missing values for given columns
