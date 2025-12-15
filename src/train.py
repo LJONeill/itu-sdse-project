@@ -1,11 +1,11 @@
 from pathlib import Path
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, cohen_kappa_score, f1_score
+from sklearn.metrics import classification_report, f1_score
 from sklearn.linear_model import LogisticRegression
-from ..config import MODELS_DIR, PROCESSED_DATA_DIR, random_state
+from config import MODELS_DIR, PROCESSED_DATA_DIR, RANDOM_STATE
 from xgboost import XGBRFClassifier
 from scipy.stats import uniform, randint
-from ..dataset import load_data
+from dataset import load_data
 from typing import Literal
 
 import datetime
@@ -42,7 +42,7 @@ def separate_feats_labels(
     X = data.drop([labels_column], axis=1)
     return X, y
 
-def perform_train_test_split(X, y, random_state=random_state, test_size=0.15):
+def perform_train_test_split(X, y, random_state=RANDOM_STATE, test_size=0.15):
     '''Perform train test split'''
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, random_state=random_state, test_size=test_size, stratify=y)
