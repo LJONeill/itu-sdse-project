@@ -14,7 +14,6 @@ func main() {
         fmt.Println("Error:", err)
         panic(err)
     }
-	//ml_pipeline()
 }
 
 func Build(ctx context.Context) error {
@@ -39,7 +38,7 @@ func Build(ctx context.Context) error {
 		"pip install --upgrade pip",
 	})
 	
-		require = require.WithExec([]string{
+	require = require.WithExec([]string{
 		"bash", "-lc",
 		"python -m pip install -r /repo/requirements.txt",
 	})
@@ -47,23 +46,66 @@ func Build(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	
+	fmt.Println("requirements installed")
 
-	python := require.WithExec([]string{"python", "config.py"})
-
-	_, err = python.
-		Directory("output"). 
-		Export(ctx, "output")
+	config := require.WithExec([]string{"python", "config.py"})
+	_, err = config.Stdout(ctx)
 	if err != nil {
 		return err
 	}
 
-	data := require.WithExec([]string{"python", "dataset.py"})
+	fmt.Println("config.py ran")
 
-	//data = data.WWithExec([]string{"python", "features.py"})
+	data := config.WithExec([]string{"python", "dataset.py"})
+	_, err = data.Stdout(ctx)
+	if err != nil {
+		return err
+	}
 
-	_, err = data.
-		Directory("output"). // See above re: folder creation
-		Export(ctx, "output")
+	fmt.Println("dataset.py ran")
+
+	features := data.WithExec([]string{"python", "features.py"})
+	_, err = features.Stdout(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("features.py ran")
+
+	train := features.WithExec([]string{"python", "modeling/train.py"})
+	_, err = train.Stdout(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("train.py ran")
+
+	selection := train.WithExec([]string{"python", "modeling/model_selection.py"})
+	_, err = selection.Stdout(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("model_selection.py ran")
+
+	_, err = selection.
+		Directory("/repo/artifacts").
+		Export(ctx, "artifacts")
+	if err != nil {
+		return err
+	}
+
+	_, err = selection.
+		Directory("/repo/data").
+		Export(ctx, "data")
+	if err != nil {
+		return err
+	}
+
+	_, err = selection.
+		Directory("/repo/mlruns").
+		Export(ctx, "mlruns")
 	if err != nil {
 		return err
 	}
