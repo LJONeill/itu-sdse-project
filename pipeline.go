@@ -49,7 +49,7 @@ func Build(ctx context.Context) error {
 	
 	fmt.Println("requirements installed")
 
-	config = require.WithExec([]string{"python", "config.py"})
+	config := require.WithExec([]string{"python", "config.py"})
 	_, err = config.Stdout(ctx)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("config.py ran")
 
-	data = config.WithExec([]string{"python", "dataset.py"})
+	data := config.WithExec([]string{"python", "dataset.py"})
 	_, err = data.Stdout(ctx)
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("dataset.py ran")
 
-	features = data.WithExec([]string{"python", "features.py"})
+	features := data.WithExec([]string{"python", "features.py"})
 	_, err = features.Stdout(ctx)
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("features.py ran")
 
-	train = features.WithExec([]string{"python", "modeling/train.py"})
+	train := features.WithExec([]string{"python", "modeling/train.py"})
 	_, err = train.Stdout(ctx)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("train.py ran")
 
-	selection = train.WithExec([]string{"python", "modeling/model_selection.py"})
+	selection := train.WithExec([]string{"python", "modeling/model_selection.py"})
 	_, err = selection.Stdout(ctx)
 	if err != nil {
 		return err
