@@ -13,7 +13,7 @@ import mlflow
 import typer
 from loguru import logger
 
-from src.config import (
+from config import (
     PROCESSED_DATA_DIR,
     INTERIM_DATA_DIR,
     SCALER_PATH,
