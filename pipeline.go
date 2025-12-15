@@ -38,7 +38,7 @@ func Build(ctx context.Context) error {
 		"pip install --upgrade pip",
 	})
 	
-		require = require.WithExec([]string{
+	require = require.WithExec([]string{
 		"bash", "-lc",
 		"python -m pip install -r /repo/requirements.txt",
 	})
@@ -46,6 +46,8 @@ func Build(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	
+	fmt.Println("requirements installed")
 
 	config := require.WithExec([]string{"python", "config.py"})
 	_, err = config.Stdout(ctx)
@@ -53,11 +55,15 @@ func Build(ctx context.Context) error {
 		return err
 	}
 
+	fmt.Println("config.py ran")
+
 	data := config.WithExec([]string{"python", "dataset.py"})
 	_, err = data.Stdout(ctx)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("dataset.py ran")
 
 	features = data.WithExec([]string{"python", "features.py"})
 	_, err = features.Stdout(ctx)
@@ -65,17 +71,23 @@ func Build(ctx context.Context) error {
 		return err
 	}
 
+	fmt.Println("features.py ran")
+
 	train = features.WithExec([]string{"python", "modeling/train.py"})
 	_, err = train.Stdout(ctx)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("train.py ran")
+
 	selection = train.WithExec([]string{"python", "modeling/model_selection.py"})
 	_, err = selection.Stdout(ctx)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("model_selection.py ran")
 
 	_, err = selection.
 		Directory("/repo/artifacts").
