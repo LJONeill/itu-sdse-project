@@ -77,7 +77,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("features.py ran")
 
-	train := features.WithExec([]string{"python", "modeling/train.py"})
+	train := features.WithExec([]string{"python", "train.py"})
 	_, err = train.Stdout(ctx)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func Build(ctx context.Context) error {
 
 	fmt.Println("train.py ran")
 
-	selection := train.WithExec([]string{"python", "modeling/model_selection.py"})
+	selection := train.WithExec([]string{"python", "model_selection.py"})
 	_, err = selection.Stdout(ctx)
 	if err != nil {
 		return err

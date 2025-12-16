@@ -3,7 +3,7 @@ from mlflow.tracking.client import MlflowClient
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
 from train import experiment_name
 
-from ..config import MODELS_DIR, PROCESSED_DATA_DIR
+from config import MODELS_DIR, PROCESSED_DATA_DIR
 
 import time
 import json
