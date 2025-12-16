@@ -10,10 +10,10 @@
 
 #### Other versions may work, but these are known to work.
 
-# THE PROJECT
-## The overall purpose of the Model Artifact is to identify users on the website that are new possible customers. This is done by collecting behaviour data from the users as input, and the target is whether they converted/turned into customers -- essentially a classification problem.
+## THE PROJECT
+#### The overall purpose of the Model Artifact is to identify users on the website that are new possible customers. This is done by collecting behaviour data from the users as input, and the target is whether they converted/turned into customers -- essentially a classification problem.
 
-## The diagram below provides an overview of the structure that this project follows.
+#### The diagram below provides an overview of the structure that this project follows.
 
 ![Project architecture](./docs/project-architecture.png)
 
