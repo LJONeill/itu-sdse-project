@@ -6,10 +6,10 @@ import mlflow
 from pathlib import Path
 from mlflow.tracking.client import MlflowClient
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
-from train import experiment_name
 
 from config import (
-    PROCESSED_DATA_DIR
+    PROCESSED_DATA_DIR,
+    EXPERIMENT_NAME as experiment_name,
 )
 
 # Paths
@@ -103,10 +103,16 @@ artifact_path = "model"
 model_name = "lead_model"
 client = MlflowClient()
 
-identify_and_register_best_model(
-    identify_best_experiment(), 
-    get_production_model_id(),
-    )
+mlflow.set_experiment(experiment_name)
+   
+experiment_id = mlflow.get_experiment_by_name(experiment_name).experiment_id
+
+with mlflow.start_run(experiment_id=experiment_id):
+
+    identify_and_register_best_model(
+        identify_best_experiment(experiment_name=experiment_name), 
+        get_production_model_id(),
+        )
 
 model_version = 1
 model_version_details = dict(client.get_model_version(name=model_name,version=model_version))
