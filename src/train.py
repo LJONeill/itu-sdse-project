@@ -1,8 +1,9 @@
+# Imports
+
 from pathlib import Path
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import classification_report, f1_score
 from sklearn.linear_model import LogisticRegression
-from config import MODELS_DIR, PROCESSED_DATA_DIR, RANDOM_STATE, TARGET_COLUMN
 from xgboost import XGBRFClassifier
 from scipy.stats import uniform, randint
 from dataset import load_data
@@ -38,6 +39,72 @@ model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
 
 # Classes and functions
 
+# Helper functions
+
+# Creating dummy columns
+def create_dummy_cols(df, col):
+    df_dummies = pd.get_dummies(df[col], prefix=col, drop_first=True)
+    new_df = pd.concat([df, df_dummies], axis=1)
+    new_df = new_df.drop(col, axis=1)
+    return new_df
+
+# Load data
+def load_data(path: Path) -> pd.DataFrame:
+    """Load data from CSV."""
+    return pd.read_csv(path)
+
+# Data type split:
+
+def data_type_split(
+        data: pd.DataFrame,
+        columns: list[str]
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    
+    for col in columns:
+        if col in data.columns:
+            cat_cols = columns
+
+    other_vars = data.drop(cat_cols, axis=1)
+
+    return cat_cols, other_vars
+
+# Dummy column creation
+
+def create_dummy_cols(df, col):
+    for col in cat_vars:
+        cat_vars[col] = cat_vars[col].astype("category")
+        cat_vars = create_dummy_cols(cat_vars, col)
+        
+    return data = pd.concat([other_vars, cat_vars], axis=1)
+
+# Float conversion
+
+def float_conversion(data):
+    for col in data:
+        data[col] = data[col].astype("float64")
+    return data
+
+# Split data
+
+def split_data(
+        data: pd.DataFrame,
+        columns: list[str]
+) -> pd.DataFrame:
+    
+    y = data[columns]
+    X = data.drop([columns], axis=1)
+
+    return y, X
+
+# Split data into train and test sets
+
+def train_test_split(X, y):
+    X_train, X_test, y_train, y_test = train_test_split(
+    X, y, random_state=42, test_size=0.15, stratify=y
+    )
+
+    return X_train, X_test, y_train, y_test
+
 # Build class
 class lr_wrapper(mlflow.pyfunc.PythonModel):
     def __init__(self, model):
@@ -46,27 +113,6 @@ class lr_wrapper(mlflow.pyfunc.PythonModel):
     def predict(self, context, model_input):
         return self.model.predict_proba(model_input)[:, 1]
     
-# Defined functions
-def separate_feats_labels(
-        data: pd.DataFrame, 
-        labels_column: str = TARGET_COLUMN,
-        ):
-    '''Identify labels column to separate features data from labels data'''
-    y = data[labels_column]
-    X = data.drop([labels_column], axis=1)
-    return X, y
-
-def perform_train_test_split(X, y, random_state=RANDOM_STATE, test_size=0.15):
-    '''Perform train test split'''
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, random_state=random_state, test_size=test_size, stratify=y)
-    
-    columns = {'column_names': list(X_train.columns)}
-    
-    with open(column_list_path, 'w+') as columns_file:
-        json.dump(columns, columns_file)
-
-    return X_train, X_test, y_train, y_test
 
 def prepare_data_for_models(data: pd.DataFrame):
 
