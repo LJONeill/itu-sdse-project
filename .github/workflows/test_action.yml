@@ -41,7 +41,7 @@ jobs:
   test: 
     name: Test Model using provided test
     needs: train
-    runs on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Run Model Inference Test Action #copied from https://github.com/lasselundstenjensen/itu-sdse-project-model-validator
