@@ -29,7 +29,8 @@ from config import (
     INTERIM_DATA_DIR,
     TARGET_COLUMN, 
     CAT_COLUMNS,
-    RANDOM_STATE
+    RANDOM_STATE,
+    EXPERIMENT_NAME as experiment_name,
 )
 
 app = typer.Typer()
@@ -54,6 +55,12 @@ model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
 
 
 # Classes and functions
+class lr_wrapper(mlflow.pyfunc.PythonModel):
+    def __init__(self, model):
+        self.model = model
+    
+    def predict(self, context, model_input):
+        return self.model.predict_proba(model_input)[:, 1]
 
 # Helper functions
 
@@ -267,13 +274,10 @@ def main(
 
 
     # MLflow + Logistic 
-
-    current_date = datetime.datetime.now().strftime("%Y_%B_%d")
-    experiment_name = current_date
-
     mlflow.set_experiment(experiment_name)
+   
     experiment_id = mlflow.get_experiment_by_name(experiment_name).experiment_id
-    
+
     mlflow.sklearn.autolog(log_input_examples=True, log_models=False)
 
     with mlflow.start_run(experiment_id=experiment_id):
@@ -285,7 +289,7 @@ def main(
         y_pred_test = best_lr_model.predict(X_test)
 
         # Metrics (same as notebook)
-        mlflow.log_metric("f1_test", f1_score(y_test, y_pred_test))
+        mlflow.log_metric("f1_score", f1_score(y_test, y_pred_test))
         mlflow.log_metric(
             "kappa_test",
             cohen_kappa_score(y_test, y_pred_test),
