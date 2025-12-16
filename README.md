@@ -48,13 +48,13 @@ The following illustrates the repository structure for this project
         │
         ├── config.py               <- Store useful variables and configuration
         │
-        ├── dataset.py              <- Scripts to download or generate data
+        ├── dataset.py              <- Data extraction and cleaning
         │
-        ├── features.py             <- Code to create features for modeling
+        ├── features.py             <- Data preparation for modeling
         │
         ├── model_selection.py      <- Code to run model comparison and serving       
         │             
-        └── train.py                <- Code to train models
+        └── train.py                <- Model training
 
 ### In order to run this project, clone this repository, then type the following into your terminal from the root directory:
 
