@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import os
+import datetime
 
 # Make the folder for the docker container storage within dagger pipeline
 os.makedirs("output", exist_ok=True)
@@ -35,6 +36,7 @@ SOURCE_COLUMN = "source"
 SOURCE_VALUE = "signup"
 
 TARGET_COLUMN = "lead_indicator"
+EXPERIMENT_NAME = datetime.datetime.now().strftime("%Y_%B_%d")
 
 # Columns to drop
 """Columns that are not relevant for modelling and dropped earlier
