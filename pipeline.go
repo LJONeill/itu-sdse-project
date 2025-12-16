@@ -11,9 +11,9 @@ func main() {
 	ctx := context.Background()
 
 	if err := Build(ctx); err != nil {
-        fmt.Println("Error:", err)
-        panic(err)
-    }
+		fmt.Println("Error:", err)
+		panic(err)
+	}
 }
 
 func Build(ctx context.Context) error {
@@ -41,7 +41,7 @@ func Build(ctx context.Context) error {
 	})
 
 	fmt.Println("pip upgraded, requirements begin installing now")
-	
+
 	require = require.WithExec([]string{
 		"bash", "-lc",
 		"python -m pip install -r /repo/requirements.txt",
@@ -50,7 +50,7 @@ func Build(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	
+
 	fmt.Println("requirements installed")
 
 	config := require.WithExec([]string{"python", "config.py"})
@@ -94,15 +94,15 @@ func Build(ctx context.Context) error {
 	fmt.Println("model_selection.py ran")
 
 	_, err = selection.
-		Directory("/repo/artifacts").
-		Export(ctx, "artifacts")
+		Directory("/repo/data").
+		Export(ctx, "data")
 	if err != nil {
 		return err
 	}
 
 	_, err = selection.
-		Directory("/repo/data").
-		Export(ctx, "data")
+		Directory("/repo/mlruns").
+		Export(ctx, "mlruns")
 	if err != nil {
 		return err
 	}

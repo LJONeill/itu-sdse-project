@@ -30,7 +30,7 @@ jobs:
           version: "0.19.6"
 
       - name: Relocate and rename model
-        run: cp data/interim/lead_model.pkl artifacts/model.pkl #double check the original model location/name is correct
+        run: cp data/interim/lr_model.pkl artifacts/model.pkl #double check the original model location/name is correct
 
       - name: Upload Model Artifact #sourced from https://github.com/lasselundstenjensen/itu-sdse-project-model-validator
         uses: actions/upload-artifact@v4.4.0
@@ -41,7 +41,7 @@ jobs:
   test: 
     name: Test Model using provided test
     needs: train
-    runs on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Run Model Inference Test Action #copied from https://github.com/lasselundstenjensen/itu-sdse-project-model-validator
