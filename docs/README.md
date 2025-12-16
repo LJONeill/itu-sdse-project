@@ -23,38 +23,38 @@ The cookiecutter files contain 5 py files which make up the majority of the code
 
 The following illustrates the repository structure for this project
 
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The README for this project.
-├── data
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- Contains a file which allows for the dvc pull of the raw data from it's source.
-│                          This promotes version control.
-│
-├── docs               <- A folder containing the images used in this README.md
-│
-├── models             <- Trained models and their performance metrics
-│
-├── notebooks          <- Jupyter notebooks containing all the original code for this project, 
-│    │                     which is an excerpt and re-written example from a real production model.
-│    │             
-│    └── main.ipynb    <- This contains the project task outline as well as the data processing part of the ML pipeline
-│
-├── pyproject.toml     <- Project configuration file with package metadata for src and configuration for tools like black
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment
-│
-└── src   <- Source code for use in this project.
-     │
-     ├── config.py               <- Store useful variables and configuration
-     │
-     ├── dataset.py              <- Scripts to download or generate data
-     │
-     ├── features.py             <- Code to create features for modeling
-     │
-     ├── model_selection.py      <- Code to run model comparison and serving       
-     │             
-     └── train.py                <- Code to train models
+    ├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
+    ├── README.md          <- The README for this project.
+    ├── data
+    │   ├── interim        <- Intermediate data that has been transformed.
+    │   ├── processed      <- The final, canonical data sets for modeling.
+    │   └── raw            <- Contains a file which allows for the dvc pull of the raw data from it's source.
+    │                          This promotes version control.
+    │
+    ├── docs               <- A folder containing the images used in this README.md
+    │
+    ├── models             <- Trained models and their performance metrics
+    │
+    ├── notebooks          <- Jupyter notebooks containing all the original code for this project, 
+    │    │                     which is an excerpt and re-written example from a real production model.
+    │    │             
+    │    └── main.ipynb    <- This contains the project task outline as well as the data processing part of the ML pipeline
+    │
+    ├── pyproject.toml     <- Project configuration file with package metadata for src and configuration for tools like black
+    │
+    ├── requirements.txt   <- The requirements file for reproducing the analysis environment
+    │
+    └── src   <- Source code for use in this project.
+        │
+        ├── config.py               <- Store useful variables and configuration
+        │
+        ├── dataset.py              <- Scripts to download or generate data
+        │
+        ├── features.py             <- Code to create features for modeling
+        │
+        ├── model_selection.py      <- Code to run model comparison and serving       
+        │             
+        └── train.py                <- Code to train models
 
 ### In order to run this project, clone this repository, then type the following into your terminal from the root directory:
 
