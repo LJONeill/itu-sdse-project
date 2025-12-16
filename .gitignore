@@ -14,6 +14,6 @@ data/interim
 data/external
 data/processed
 
+mlruns/*
 
-mlruns
 notebook
