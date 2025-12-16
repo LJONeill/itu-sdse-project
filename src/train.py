@@ -281,32 +281,28 @@ def main(
     mlflow.sklearn.autolog(log_input_examples=True, log_models=False)
 
     with mlflow.start_run(experiment_id=experiment_id):
-
         lr_grid = setup_grid_search(lr_model, lr_params, X_train, y_train)
         best_lr_model = lr_grid.best_estimator_
-
+        
         y_pred_train = best_lr_model.predict(X_train)
         y_pred_test = best_lr_model.predict(X_test)
-
-        # Metrics (same as notebook)
+        
         mlflow.log_metric("f1_score", f1_score(y_test, y_pred_test))
         mlflow.log_metric(
             "kappa_test",
             cohen_kappa_score(y_test, y_pred_test),
-        )
-
-        # Params
+            )
+        
         mlflow.log_params(lr_grid.best_params_)
         mlflow.log_param("data_version", "00000")
-
-        # Save model 
+        
         joblib.dump(best_lr_model, lr_model_path)
-        mlflow.log_artifact(lr_model_path, artifact_path="model")
-
+        
         mlflow.pyfunc.log_model(
-            artifact_path="model_pyfunc",
+            artifact_path="model",
             python_model=lr_wrapper(best_lr_model),
-        )
+            )
+
 
     logger.info("Training completed")
 

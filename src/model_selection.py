@@ -1,8 +1,6 @@
 # Imports
 import time
-import json
 import mlflow
-
 from pathlib import Path
 from mlflow.tracking.client import MlflowClient
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
@@ -12,119 +10,113 @@ from config import (
     EXPERIMENT_NAME as experiment_name,
 )
 
+# Constants
+ARTIFACT_PATH = "model"
+MODEL_NAME = "lead_model"
+
 # Paths
-model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
+model_results_path: Path = PROCESSED_DATA_DIR / "model_results.json"
 
-# Functions
+# Helper functions
 
-def identify_best_experiment(experiment_name):
 
-    experiment_ids = [mlflow.get_experiment_by_name(experiment_name).experiment_id]
-
-    experiment_best = mlflow.search_runs(
-        experiment_ids=experiment_ids,
-        order_by=["metrics.f1_score DESC"],
-        max_results=1
-    ).iloc[0]
-
-    return experiment_best
-
-def get_production_model_id():
-
-    prod_model = [model for model in client.search_model_versions(f"name='{model_name}'") if dict(model)['current_stage']=='Production']
-
-    if len(prod_model)==0:
-        return print('No model in production')
-    else:
-        prod_model_run_id = dict(prod_model[0])['run_id']
-        
-    return prod_model_run_id
-
-def wait_until_ready(model_name, model_version):
+def wait_until_ready(client, model_name, model_version):
     for _ in range(10):
-        model_version_details = client.get_model_version(
-          name=model_name,
-          version=model_version,
-        )
-        status = ModelVersionStatus.from_string(model_version_details.status)
+        mv = client.get_model_version(name=model_name, version=model_version)
+        status = ModelVersionStatus.from_string(mv.status)
         print(f"Model status: {ModelVersionStatus.to_string(status)}")
         if status == ModelVersionStatus.READY:
-            break
+            return
         time.sleep(1)
-        
-def identify_and_register_best_model(
-        experiment_best,
-        prod_model_run_id,
-        ):
-    
-    model_status = {}
-    model_details = {}
-    run_id = None
 
-    train_model_score = experiment_best["metrics.f1_score"]
 
-    prod_data, _ = mlflow.get_run(prod_model_run_id)
-    prod_model_score = prod_data[1]["metrics.f1_score"]
+def identify_best_experiment(experiment_name):
+    experiment = mlflow.get_experiment_by_name(experiment_name)
 
-    model_status["current"] = train_model_score
-    model_status["prod"] = prod_model_score
+    runs = mlflow.search_runs(
+        experiment_ids=[experiment.experiment_id],
+        order_by=["metrics.f1_score DESC"],
+        max_results=1,
+    )
 
-    if train_model_score>prod_model_score:
-        run_id = experiment_best["run_id"]
+    return runs.iloc[0]
 
-    if run_id is not None:
-        
 
-        model_uri = "runs:/{run_id}/{artifact_path}".format(
-            run_id=run_id,
-            artifact_path=artifact_path
-        )
-        model_details = mlflow.register_model(model_uri=model_uri, name=model_name)
-        wait_until_ready(model_details.name, model_details.version)
-        model_details = dict(model_details)
+def get_production_model_run_id(client, model_name):
+    prod_models = [
+        m for m in client.search_model_versions(f"name='{model_name}'")
+        if dict(m)["current_stage"] == "Production"
+    ]
 
-    return model_details
+    if not prod_models:
+        return None
 
-def wait_for_deployment(model_name, model_version, stage='Staging'):
-    status = False
-    while not status:
-        model_version_details = dict(
-            client.get_model_version(name=model_name,version=model_version)
-            )
-        if model_version_details['current_stage'] == stage:
-            print(f'Transition completed to {stage}')
-            status = True
-            break
-        else:
-            time.sleep(2)
-    return status
+    return dict(prod_models[0])["run_id"]
 
-artifact_path = "model"
-model_name = "lead_model"
-client = MlflowClient()
 
-mlflow.set_experiment(experiment_name)
-   
-experiment_id = mlflow.get_experiment_by_name(experiment_name).experiment_id
+def register_best_model(client, run_id):
+    model_uri = f"runs:/{run_id}/{ARTIFACT_PATH}"
 
-with mlflow.start_run(experiment_id=experiment_id):
+    model_details = mlflow.register_model(
+        model_uri=model_uri,
+        name=MODEL_NAME,
+    )
 
-    identify_and_register_best_model(
-        identify_best_experiment(experiment_name=experiment_name), 
-        get_production_model_id(),
-        )
+    wait_until_ready(client, model_details.name, model_details.version)
+    return model_details.version
 
-model_version = 1
-model_version_details = dict(client.get_model_version(name=model_name,version=model_version))
-model_status = True
 
-if model_version_details['current_stage'] != 'Staging':
+def transition_to_staging(client, model_name, model_version):
     client.transition_model_version_stage(
         name=model_name,
         version=model_version,
-        stage="Staging", 
-        archive_existing_versions=True
+        stage="Staging",
+        archive_existing_versions=True,
     )
-    model_status = wait_for_deployment(model_name, model_version, 'Staging')
-else:
-    print('Model already in staging')
+
+    while True:
+        mv = dict(client.get_model_version(name=model_name, version=model_version))
+        if mv["current_stage"] == "Staging":
+            print("Transition completed to Staging")
+            break
+        time.sleep(2)
+
+
+# Main
+
+
+def main():
+    mlflow.set_experiment(experiment_name)
+    client = MlflowClient()
+
+    # 1. Identify best training run
+    best_run = identify_best_experiment(experiment_name)
+    best_f1 = best_run["metrics.f1_score"]
+    best_run_id = best_run["run_id"]
+
+    # 2. Identify current production model (if any)
+    prod_run_id = get_production_model_run_id(client, MODEL_NAME)
+
+    register_new_model = False
+
+    if prod_run_id is None:
+        print("No model in production — registering first model")
+        register_new_model = True
+    else:
+        prod_run = mlflow.get_run(prod_run_id)
+        prod_f1 = prod_run.data.metrics["f1_score"]
+
+        if best_f1 > prod_f1:
+            print("New model outperforms production — registering")
+            register_new_model = True
+        else:
+            print("Production model performs better — skipping registration")
+
+    # 3. Register & promote
+    if register_new_model:
+        model_version = register_best_model(client, best_run_id)
+        transition_to_staging(client, MODEL_NAME, model_version)
+
+
+if __name__ == "__main__":
+    main()
