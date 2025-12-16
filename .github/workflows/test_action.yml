@@ -1,4 +1,4 @@
-name: Run Dagger pipeline
+name: Run Dagger pipeline to train, then test model
 
 on:
   push:
@@ -7,8 +7,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  dagger:
-    name: Run Dagger pipeline
+  train:
+    name: Run Dagger pipeline to train
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25.4
+          go-version: 1.25.5
           cache: false
 
       - name: Run Dagger pipeline
@@ -28,3 +28,21 @@ jobs:
           verb: run
           args: go run pipeline.go
           version: "0.19.6"
+
+      - name: Relocate and rename model
+        run: cp data/interim/lead_model.pkl artifacts/model.pkl #double check the original model location/name is correct
+
+      - name: Upload Model Artifact #sourced from https://github.com/lasselundstenjensen/itu-sdse-project-model-validator
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          name: model
+          path: artifacts/model.pkl
+
+  test: 
+    name: Test Model using provided test
+    needs: train
+    runs on: ubuntu-latest
+
+    steps:
+      - name: Run Model Inference Test Action #copied from https://github.com/lasselundstenjensen/itu-sdse-project-model-validator
+        uses: lasselundstenjensen/itu-sdse-project-model-validator@main
