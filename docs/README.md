@@ -1,6 +1,6 @@
 # ITU BDS MLOPS'25 - Project
 
-#### Prior to working with this project, ensure these versions are installed:
+Prior to working with this project, ensure these versions are installed:
 
     dvc 3.63.0
     Docker 28.5.2
@@ -8,20 +8,20 @@
     dagger v0.19.6
     go 1.25.5
 
-#### Other versions may work, but these are known to work.
+Other versions may work, but these are known to work.
 
 ## THE PROJECT
-#### The overall purpose of the Model Artifact is to identify users on the website that are new possible customers. This is done by collecting behaviour data from the users as input, and the target is whether they converted/turned into customers -- essentially a classification problem.
+The overall purpose of the Model Artifact is to identify users on the website that are new possible customers. This is done by collecting behaviour data from the users as input, and the target is whether they converted/turned into customers -- essentially a classification problem.
 
-#### The diagram below provides an overview of the structure that this project follows.
+The diagram below provides an overview of the structure that this project follows.
 
 ![Project architecture](./docs/project-architecture.png)
 
-#### The cookiecutter files contain 5 py files which make up the majority of the code from the original jupyter notebook. They are split in adherance to standard data science MLOPS project structure workflow as seen in the diagram below:
+The cookiecutter files contain 5 py files which make up the majority of the code from the original jupyter notebook. They are split in adherance to standard data science MLOPS project structure workflow as seen in the diagram below:
 
 ![Standard ML Project Structure](./docs/standard-ml-structure.png)
 
-#### The following illustrates the repository structure for this project
+The following illustrates the repository structure for this project
 
 ├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
 ├── README.md          <- The README for this project.
