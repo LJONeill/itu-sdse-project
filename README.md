@@ -55,8 +55,9 @@ The following illustrates the repository structure for this project
         │             
         └── train.py                <- Model training
 
-### In order to run this project, clone this repository, then type the following into your terminal from the root directory:
+# Run this project 
+In order to run this project, clone this repository, then type the following into your terminal from the root directory:
 
     go run pipeline.go
 
-### Subsequently, the most important output, the trained model named 'model' can be found in the models folder
+Subsequently, the most important output, the trained model named 'model', can be found in the models folder.
