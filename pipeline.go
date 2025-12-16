@@ -24,6 +24,8 @@ func Build(ctx context.Context) error {
 	}
 	defer client.Close()
 
+	fmt.Println("Docker contacted")
+
 	// Mirror the root of our repository
 	itu_sdse_project := client.Host().Directory(".")
 
@@ -37,6 +39,8 @@ func Build(ctx context.Context) error {
 		"bash", "-lc",
 		"pip install --upgrade pip",
 	})
+
+	fmt.Println("pip upgraded, requirements begin installing now")
 	
 	require = require.WithExec([]string{
 		"bash", "-lc",
