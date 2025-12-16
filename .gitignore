@@ -8,3 +8,8 @@
 # dvc files
 .dvc/tmp/
 .dvc/cache/
+
+# large or unwanted folders
+data
+mlruns
+notebook
