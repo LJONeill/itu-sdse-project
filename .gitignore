@@ -10,6 +10,10 @@
 .dvc/cache/
 
 # large or unwanted folders
-data
+data/interim
+data/external
+data/processed
+
+
 mlruns
 notebook
