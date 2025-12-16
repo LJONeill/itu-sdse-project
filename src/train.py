@@ -105,7 +105,7 @@ def train_test_split(X, y):
 
     return X_train, X_test, y_train, y_test
 
-# Build class
+# Build class (not sure how this is used)
 class lr_wrapper(mlflow.pyfunc.PythonModel):
     def __init__(self, model):
         self.model = model
@@ -113,142 +113,64 @@ class lr_wrapper(mlflow.pyfunc.PythonModel):
     def predict(self, context, model_input):
         return self.model.predict_proba(model_input)[:, 1]
     
+# Model training
 
-def prepare_data_for_models(data: pd.DataFrame):
-
-    X, y = separate_feats_labels(data=data)
-    return perform_train_test_split(X=X, y=y)
-
-def setup_grid_search(
-        model_class_choice: Literal["xgboost", "lr"],
-        xgboost_params: dict,
-        lr_params: dict,
-        ):
-
-    if model_class_choice == "xgboost":
-        model = XGBRFClassifier()
-        params = xgboost_params
-    elif model_class_choice == "lr":
-        model = LogisticRegression()
-        params = lr_params
-    else:
-        print("Error: Invalid model choice entered, please choose between xgboost or lr")
-
-    model_grid = RandomizedSearchCV(
-        model,
-        param_distributions=params,
-        n_jobs=-1,
-        verbose=3,
-        n_iter=10,
-        cv=10,
-        )
-    
-    return model_grid
-    
-def make_model_predictions(
-        model_results: dict,
-        data,
-        model_class_choice: Literal["xgboost", "lr"] = "lr",
-        ):
-
-    if model_class_choice == "xgboost":
-        model_path = xgboost_model_path
-    elif model_class_choice == "lr":
-        model_path = lr_model_path
-    else:
-        print(error_mcc)
-
-    X_train, X_test, y_train, y_test = prepare_data_for_models(data=data)
-
-    model_grid = setup_grid_search(model_class_choice=model_class_choice)
-
-    model_grid.fit(X_train, y_train)
-
-    y_pred_train = model_grid.predict(X_train)
-  
-    model_results[model_path] = classification_report(y_train, y_pred_train, output_dict=True)
-
-    return model_grid, model_results, X_test, y_test
-
-def train_and_save_model(
-        model_class_choice: Literal["xgboost", "lr"],
-        model_results: dict,
-        data,
-        ):
-    if model_class_choice == "xgboost":
-        model_path = xgboost_model_path
-    elif model_class_choice == "lr":
-        model_path = lr_model_path
-    else:
-        print(error_mcc)
-
-    with mlflow.start_run(experiment_id=experiment_id) as run:
-
-        model_grid, model_results, X_test, y_test = make_model_predictions(model_results=model_results, data=data)
-
-        best_model = model_grid.best_estimator_
-
-        y_pred_test = model_grid.predict(X_test)
-
-    if model_class_choice == "xgboost":
-        best_model.save_model(model_path)
-    elif model_class_choice == "lr":
-        mlflow.log_metric('f1_score', f1_score(y_test, y_pred_test))
-        mlflow.log_artifacts("artifacts", artifact_path="model")
-        mlflow.log_param("data_version", "00000")
-        mlflow.pyfunc.log_model('model', python_model=lr_wrapper(best_model))
-        joblib.dump(value=best_model, filename=model_path)
-    else:
-        print(error_mcc)
-    
-    return model_results
-
-# Error message for invalid model choice
-error_mcc = "Error: Invalid model_class_choice, choose xgboost or lr"
-
-# Define experiment name
-current_date = datetime.datetime.now().strftime("%Y_%B_%d")
-experiment_name = current_date
-
-# Start mlflow tracking
-mlflow.set_experiment(experiment_name)
-mlflow.sklearn.autolog(log_input_examples=True, log_models=False)
-experiment_id = mlflow.get_experiment_by_name(experiment_name).experiment_id
-
-# Parameters by model
-xgboost_params = {
+# I am gonna leave the model here - but it should be in cofig.py
+model = XGBRFClassifier(random_state=42)
+params = {
     "learning_rate": uniform(1e-2, 3e-1),
     "min_split_loss": uniform(0, 10),
     "max_depth": randint(3, 10),
     "subsample": uniform(0, 1),
     "objective": ["reg:squarederror", "binary:logistic", "reg:logistic"],
     "eval_metric": ["aucpr", "error"]
-    }
+}
 
-lr_params = {
-    'solver': ["newton-cg", "lbfgs", "liblinear", "sag", "saga"],
-    'penalty':  ["none", "l1", "l2", "elasticnet"],
-    'C' : [100, 10, 1.0, 0.1, 0.01]
-    }
+# Setup grid search
 
-# Load data
-data = load_data(INPUT_PATH)
+def setup_grid_search(model, params):
+    model_grid = RandomizedSearchCV(model, param_distributions=params, n_jobs=-1, verbose=3, n_iter=10, cv=10)
+    model_grid.fit(X_train, y_train)
+    return model_grid
 
-#initialise results dictionary
-model_results = dict()
+# These will all be ran in main runner
+best_model_xgboost_params = model_grid.best_params_
+print("Best xgboost params")
+pprint(best_model_xgboost_params)
 
-train_and_save_model(
-    "xgboost", 
-    model_results=model_results,
-    data=data,
-    )
+y_pred_train = model_grid.predict(X_train)
+y_pred_test = model_grid.predict(X_test)
+print("Accuracy train", accuracy_score(y_pred_train, y_train ))
+print("Accuracy test", accuracy_score(y_pred_test, y_test))
 
-train_and_save_model(
-    "lr", 
-    model_results=model_results,
-    data=data,
-    )
+# also in main runner
 
-# Store model results
-with open(model_results_path, 'w+') as results_file:
-    json.dump(model_results, results_file)
+conf_matrix = confusion_matrix(y_test, y_pred_test)
+print("Test actual/predicted\n")
+print(pd.crosstab(y_test, y_pred_test, rownames=['Actual'], colnames=['Predicted'], margins=True),'\n')
+print("Classification report\n")
+print(classification_report(y_test, y_pred_test),'\n')
+
+conf_matrix = confusion_matrix(y_train, y_pred_train)
+print("Train actual/predicted\n")
+print(pd.crosstab(y_train, y_pred_train, rownames=['Actual'], colnames=['Predicted'], margins=True),'\n')
+print("Classification report\n")
+print(classification_report(y_train, y_pred_train),'\n')
+
+# Also in main runner
+xgboost_model = model_grid.best_estimator_
+xgboost_model_path = "./artifacts/lead_model_xgboost.json"
+xgboost_model.save_model(xgboost_model_path)
+
+model_results = {
+    xgboost_model_path: classification_report(y_train, y_pred_train, output_dict=True)
+}
+
+# Docker main script
+@app.command()
+def main(
+    input_path: Path = INPUT_PATH,
+    output_path: Path = model_results_path,
+):
+    """Run the data processing pipeline."""
+
