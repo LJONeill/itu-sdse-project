@@ -9,11 +9,7 @@ from mlflow.entities.model_registry.model_version_status import ModelVersionStat
 
 from config import (
     PROCESSED_DATA_DIR,
-<<<<<<< Updated upstream
     EXPERIMENT_NAME as experiment_name,
-=======
-    EXPERIMENT_NAME
->>>>>>> Stashed changes
 )
 
 # Paths
@@ -21,7 +17,7 @@ model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
 
 # Functions
 
-def identify_best_experiment(experiment_name=EXPERIMENT_NAME):
+def identify_best_experiment(experiment_name):
 
     experiment_ids = [mlflow.get_experiment_by_name(experiment_name).experiment_id]
 
