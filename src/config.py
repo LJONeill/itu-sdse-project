@@ -37,10 +37,6 @@ SOURCE_VALUE = "signup"
 
 TARGET_COLUMN = "lead_indicator"
 EXPERIMENT_NAME = datetime.datetime.now().strftime("%Y_%B_%d")
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
 
 # Columns to drop
 """Columns that are not relevant for modelling and dropped earlier
