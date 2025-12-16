@@ -20,6 +20,7 @@ from config import (
     PROCESSED_DATA_DIR,
     INTERIM_DATA_DIR,
     TARGET_COLUMN, 
+    CAT_COLUMNS
 )
 
 # Paths
@@ -66,16 +67,21 @@ def data_type_split(
 
     other_vars = data.drop(cat_cols, axis=1)
 
-    return cat_cols, other_vars
+    return cat_vars, other_vars
 
 # Dummy column creation
 
-def create_dummy_cols(df, col):
+def cast_to_category(df, col):
     for col in cat_vars:
         cat_vars[col] = cat_vars[col].astype("category")
-        cat_vars = create_dummy_cols(cat_vars, col)
-        
-    return data = pd.concat([other_vars, cat_vars], axis=1)
+    return cat_vars
+
+def concat_vars(data, 
+                other_vars, 
+                cat_vars
+) -> pd.DataFrame:
+    data = pd.concat([other_vars, cat_vars], axis=1)
+    return data 
 
 # Float conversion
 
@@ -172,5 +178,80 @@ def main(
     input_path: Path = INPUT_PATH,
     output_path: Path = model_results_path,
 ):
-    """Run the data processing pipeline."""
+    """Model training pipeline."""
+
+    logger.info("Processing started")
+
+    # 1. Load data
+    data = load_data(input_path)
+
+    # 2. split data
+    cat_cols, other_vars = data_type_split(
+        data, 
+        CAT_COLUMNS
+    )
+
+    # 3. Cast categorical variables to category type
+    cat_vars = cast_to_category(data, cat_vars)
+
+    # 4. Concatenate categorical and other variables
+    data = concat_vars(
+        data, 
+        other_vars, 
+        cat_vars
+    )
+
+    # 5. convert into float
+    data = float_conversion(data)
+
+    # 6. Split data into features and target
+    y, X = split_data(data, TARGET_COLUMN)
+
+    # 7. Split data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+    # 8. Get model grid
+    model_grid = setup_grid_search(model, params)
+
+    # 9. Get best parameters
+    best_model_xgboost_params = model_grid.best_params_
+    y_pred_train = model_grid.predict(X_train)
+    y_pred_test = model_grid.predict(X_test)
+
+    # 10. Get confusion matrix
+    conf_matrix_test = confusion_matrix(y_test, y_pred_test)
+    conf_matrix_train = confusion_matrix(y_train, y_pred_train)
+
+    # 11. Get model
+    xgboost_model = model_grid.best_estimator_
+
+    # MLflow tracking
+    with mlflow.start_run():
+        mlflow.log_param("min_date", str(min_date))
+        mlflow.log_param("max_date", str(max_date))
+        mlflow.log_artifact(output_path)
+        mlflow.log_artifact(DATE_LIMITS_PATH)
+        mlflow.log_artifact(TARGET_DISTRIBUTION_PATH)
+
+if __name__ == "__main__":
+    app()
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
 
