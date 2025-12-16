@@ -35,6 +35,8 @@ xgboost_model_path: Path = INTERIM_DATA_DIR / "xgboost_model.pkl"
 lr_model_path: Path = INTERIM_DATA_DIR / "lr_model.pkl"
 column_list_path: Path = INTERIM_DATA_DIR / "columns_list.json"
 
+accuracy_scores_path: Path = INTERIM_DATA_DIR / "accuracy_scores.json"
+
 # Output data
 model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
 
@@ -140,14 +142,25 @@ def setup_grid_search(model, params):
     return model_grid
 
 # These will all be ran in main runner
-best_model_xgboost_params = model_grid.best_params_
-print("Best xgboost params")
-pprint(best_model_xgboost_params)
 
-y_pred_train = model_grid.predict(X_train)
-y_pred_test = model_grid.predict(X_test)
-print("Accuracy train", accuracy_score(y_pred_train, y_train ))
-print("Accuracy test", accuracy_score(y_pred_test, y_test))
+def get_best_model_params(model_grid):
+    best_model_xgboost_params = model_grid.best_params_
+
+    y_pred_train = model_grid.predict(X_train)
+    y_pred_test = model_grid.predict(X_test)
+
+    artifact = {
+        "accuracy_train": accuracy_score(y_pred_train, y_train),
+        "accuracy_test": accuracy_score(y_pred_test, y_test),
+    }
+
+    with open(accuracy_scores_path, "w") as f:
+        json.dump(artifact, f)
+
+    
+
+    return best_model_xgboost_params, y_pred_test, y_pred_train
+
 
 # also in main runner
 
@@ -215,8 +228,7 @@ def main(
 
     # 9. Get best parameters
     best_model_xgboost_params = model_grid.best_params_
-    y_pred_train = model_grid.predict(X_train)
-    y_pred_test = model_grid.predict(X_test)
+
 
     # 10. Get confusion matrix
     conf_matrix_test = confusion_matrix(y_test, y_pred_test)
@@ -227,11 +239,9 @@ def main(
 
     # MLflow tracking
     with mlflow.start_run():
-        mlflow.log_param("min_date", str(min_date))
-        mlflow.log_param("max_date", str(max_date))
-        mlflow.log_artifact(output_path)
-        mlflow.log_artifact(DATE_LIMITS_PATH)
-        mlflow.log_artifact(TARGET_DISTRIBUTION_PATH)
+        mlflow.log_param("param_distributions", str(params))
+        mlflow.log_param("Best xgboost params", str(best_model_xgboost_params))
+        mlflow.log_artifact(accuracy_scores_path)
 
 if __name__ == "__main__":
     app()
