@@ -15,9 +15,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Pull data with dvc
-        run: dvc pull 
+      - name: Install dvc
+        run: pip install dvc
 
+      - name: Pull data with dvc
+        run: dvc pull
+        
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
