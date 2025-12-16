@@ -30,7 +30,7 @@ INPUT_PATH: Path = PROCESSED_DATA_DIR / "training_gold.csv"
 features_path: Path = INTERIM_DATA_DIR / "features.csv"
 labels_path: Path = INTERIM_DATA_DIR/ "labels.csv"
 xgboost_model_path: Path = INTERIM_DATA_DIR / "xgboost_model.pkl"
-lr_model_path: Path = INTERIM_DATA_DIRR / "lr_model.pkl"
+lr_model_path: Path = INTERIM_DATA_DIR / "lr_model.pkl"
 column_list_path: Path = INTERIM_DATA_DIR / "columns_list.json"
 
 # Output data
