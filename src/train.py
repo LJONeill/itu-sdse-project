@@ -31,14 +31,16 @@ INPUT_PATH: Path = PROCESSED_DATA_DIR / "training_gold.csv"
 # Intermediate data
 features_path: Path = INTERIM_DATA_DIR / "features.csv"
 labels_path: Path = INTERIM_DATA_DIR/ "labels.csv"
-xgboost_model_path: Path = INTERIM_DATA_DIR / "xgboost_model.pkl"
+xgboost_model_path: Path = INTERIM_DATA_DIR / "lead_model_xgboost.json"
 lr_model_path: Path = INTERIM_DATA_DIR / "lr_model.pkl"
 column_list_path: Path = INTERIM_DATA_DIR / "columns_list.json"
 
 accuracy_scores_path: Path = INTERIM_DATA_DIR / "accuracy_scores.json"
+classification_reports_path: Path = INTERIM_DATA_DIR / "classification_reports.json"
 
 # Output data
 model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
+
 
 # Classes and functions
 
@@ -141,7 +143,7 @@ def setup_grid_search(model, params):
     model_grid.fit(X_train, y_train)
     return model_grid
 
-# These will all be ran in main runner
+# Get best model params
 
 def get_best_model_params(model_grid):
     best_model_xgboost_params = model_grid.best_params_
@@ -162,28 +164,47 @@ def get_best_model_params(model_grid):
     return best_model_xgboost_params, y_pred_test, y_pred_train
 
 
-# also in main runner
+# Get confusion matrices ... also need to log this?
 
-conf_matrix = confusion_matrix(y_test, y_pred_test)
-print("Test actual/predicted\n")
-print(pd.crosstab(y_test, y_pred_test, rownames=['Actual'], colnames=['Predicted'], margins=True),'\n')
-print("Classification report\n")
-print(classification_report(y_test, y_pred_test),'\n')
+def get_confusion_matrix(
+        y_test, 
+        y_pred_test, 
+        y_train, 
+        y_pred_train
+):
+    conf_matrix_test = confusion_matrix(y_test, y_pred_test)
+    conf_matrix_train = confusion_matrix(y_train, y_pred_train)
 
-conf_matrix = confusion_matrix(y_train, y_pred_train)
-print("Train actual/predicted\n")
-print(pd.crosstab(y_train, y_pred_train, rownames=['Actual'], colnames=['Predicted'], margins=True),'\n')
-print("Classification report\n")
-print(classification_report(y_train, y_pred_train),'\n')
+    classification_reports = {
+        classification_report_test = pd.crosstab(y_test,
+                                                 y_pred_test,
+                                                 rownames=['Actual'],
+                                                 colnames=['Predicted'],
+                                                 margins=True))
+    
+        classification_report_train = pd.crosstab(y_test,
+                                                  y_pred_test,
+                                                  rownames=['Actual'],
+                                                  colnames=['Predicted'],
+                                                  margins=True))
+
+    }
+
+    with open(classification_reports_path, "w") as f:
+        json.dump(classification_reports, f, indent=2)
+
+    return conf_matrix_test, conf_matrix_train
+
 
 # Also in main runner
-xgboost_model = model_grid.best_estimator_
-xgboost_model_path = "./artifacts/lead_model_xgboost.json"
-xgboost_model.save_model(xgboost_model_path)
 
-model_results = {
-    xgboost_model_path: classification_report(y_train, y_pred_train, output_dict=True)
-}
+def get_xgboost_model(model_grid, model_results):
+    xgboost_model = model_grid.best_estimator_
+
+    with open(xgboost_model_path, "w") as f:
+        json.dump(xgboost_model, f)
+
+    return xgboost_model
 
 # Docker main script
 @app.command()
@@ -227,21 +248,27 @@ def main(
     model_grid = setup_grid_search(model, params)
 
     # 9. Get best parameters
-    best_model_xgboost_params = model_grid.best_params_
+    best_model_xgboost_params, y_pred_train, y_pred_test = get_best_model_params(model_grid)
 
 
     # 10. Get confusion matrix
-    conf_matrix_test = confusion_matrix(y_test, y_pred_test)
-    conf_matrix_train = confusion_matrix(y_train, y_pred_train)
+    conf_matrix_test, conf_matrix_train = confusion_matrix(y_test, 
+        y_pred_test, 
+        y_train, 
+        y_pred_train)
 
     # 11. Get model
     xgboost_model = model_grid.best_estimator_
+
+    data.to_csv(output_path, index=False)
 
     # MLflow tracking
     with mlflow.start_run():
         mlflow.log_param("param_distributions", str(params))
         mlflow.log_param("Best xgboost params", str(best_model_xgboost_params))
         mlflow.log_artifact(accuracy_scores_path)
+        mlflow.log_artifact(classification_reports_path)
+        mlflow.log_artifact(classification_reports_path)
 
 if __name__ == "__main__":
     app()
