@@ -28,7 +28,7 @@ The following illustrates the repository structure for this project
     ├── data
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- Contains a file which allows for the dvc pull of the raw data from it's source.
+    │   └── raw            <- Contains a file for the dvc pull of the raw data from it's source.
     │                          This promotes version control.
     │
     ├── docs               <- A folder containing the images used in this README.md
@@ -38,9 +38,8 @@ The following illustrates the repository structure for this project
     ├── notebooks          <- Jupyter notebooks containing all the original code for this project, 
     │    │                     which is an excerpt and re-written example from a real production model.
     │    │             
-    │    └── main.ipynb    <- This contains the project task outline as well as the data processing part of the ML pipeline
-    │
-    ├── pyproject.toml     <- Project configuration file with package metadata for src and configuration for tools like black
+    │    └── main.ipynb    <- This contains the project task outline,
+    │                           as well as the data processing part of the ML pipeline
     │
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment
     │
