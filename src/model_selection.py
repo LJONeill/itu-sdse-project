@@ -1,16 +1,21 @@
+# Imports
+import time
+import json
+import mlflow
+
 from pathlib import Path
 from mlflow.tracking.client import MlflowClient
 from mlflow.entities.model_registry.model_version_status import ModelVersionStatus
 from train import experiment_name
 
-from config import MODELS_DIR, PROCESSED_DATA_DIR
-
-import time
-import json
-import mlflow
+from config import (
+    PROCESSED_DATA_DIR
+)
 
 # Paths
-model_results_path: Path = MODELS_DIR /  "model_results.json"
+model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
+
+# Functions
 
 def identify_best_experiment(experiment_name):
 
