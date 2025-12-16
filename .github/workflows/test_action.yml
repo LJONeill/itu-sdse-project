@@ -19,7 +19,7 @@ jobs:
         run: pip install dvc
 
       - name: Pull data with dvc
-        run: dvc pull
+        run: dvc update
         
       - name: Set up Go
         uses: actions/setup-go@v6
