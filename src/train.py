@@ -15,14 +15,28 @@ import matplotlib.pyplot as plt
 import joblib
 import json
 
+from config import (
+    PROCESSED_DATA_DIR,
+    INTERIM_DATA_DIR,
+    TARGET_COLUMN, 
+)
+
 # Paths
-data_gold_path: Path = PROCESSED_DATA_DIR / "training_gold.csv"
-features_path: Path = PROCESSED_DATA_DIR / "features.csv"
-labels_path: Path = PROCESSED_DATA_DIR / "labels.csv"
-xgboost_model_path: Path = MODELS_DIR / "xgboost_model.pkl"
-lr_model_path: Path = MODELS_DIR / "lr_model.pkl"
-column_list_path: Path = MODELS_DIR / "columns_list.json"
-model_results_path: Path = MODELS_DIR /  "model_results.json"
+
+# Input
+INPUT_PATH: Path = PROCESSED_DATA_DIR / "training_gold.csv"
+
+# Intermediate data
+features_path: Path = INTERIM_DATA_DIR / "features.csv"
+labels_path: Path = INTERIM_DATA_DIR/ "labels.csv"
+xgboost_model_path: Path = INTERIM_DATA_DIR / "xgboost_model.pkl"
+lr_model_path: Path = INTERIM_DATA_DIR / "lr_model.pkl"
+column_list_path: Path = INTERIM_DATA_DIR / "columns_list.json"
+
+# Output data
+model_results_path: Path = PROCESSED_DATA_DIR /  "model_results.json"
+
+# Classes and functions
 
 # Build class
 class lr_wrapper(mlflow.pyfunc.PythonModel):
@@ -47,9 +61,9 @@ def perform_train_test_split(X, y, random_state=RANDOM_STATE, test_size=0.15):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, random_state=random_state, test_size=test_size, stratify=y)
     
-    # Store training data
+    columns = {'column_names': list(X_train.columns)}
+    
     with open(column_list_path, 'w+') as columns_file:
-        columns = {'column_names': list(X_train.columns)}
         json.dump(columns, columns_file)
 
     return X_train, X_test, y_train, y_test
@@ -172,7 +186,7 @@ lr_params = {
     }
 
 # Load data
-data = load_data(data_gold_path)
+data = load_data(INPUT_PATH)
 
 #initialise results dictionary
 model_results = dict()
