@@ -15,11 +15,11 @@ The overall purpose of the Model Artifact is to identify users on the website th
 
 The diagram below provides an overview of the structure that this project follows.
 
-    ![Project architecture](./docs/project-architecture.png)
+![Project architecture](./docs/project-architecture.png)
 
 The cookiecutter files contain 5 py files which make up the majority of the code from the original jupyter notebook. They are split in adherance to standard data science MLOPS project structure workflow as seen in the diagram below:
 
-    ![Standard ML Project Structure](./docs/standard-ml-structure.png)
+![Standard ML Project Structure](./docs/standard-ml-structure.png)
 
 The following illustrates the repository structure for this project
 
