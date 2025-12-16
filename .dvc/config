@@ -1,4 +1,4 @@
 [core]
-    remote = github
-['remote "github"']
+    remote = raw_data.csv
+['remote "raw_data.csv"']
     url = https://raw.githubusercontent.com/Jeppe-T-K/itu-sdse-project-data/refs/heads/main/raw_data.csv
