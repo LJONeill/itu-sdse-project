@@ -2,14 +2,12 @@
 
 from pathlib import Path
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
-from sklearn.metrics import classification_report, f1_score
+from sklearn.metrics import classification_report, f1_score, confusion_matrix, accuracy_score
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBRFClassifier
 from scipy.stats import uniform, randint
 from typing import Literal
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import classification_report
+
 
 import mlflow
 import pandas as pd
@@ -18,6 +16,13 @@ import json
 import typer
 import warnings
 from loguru import logger
+import mlflow.pyfunc
+
+from sklearn.linear_model import LogisticRegression
+import os
+from sklearn.metrics import cohen_kappa_score, f1_score
+import matplotlib.pyplot as plt
+import joblib
 
 from config import (
     PROCESSED_DATA_DIR,
@@ -103,15 +108,6 @@ def split_data(data: pd.DataFrame, target_column: str):
     y = data[target_column]
     X = data.drop([target_column], axis=1)
     return y, X
-
-
-# Build class (not sure how this is used)
-class lr_wrapper(mlflow.pyfunc.PythonModel):
-    def __init__(self, model):
-        self.model = model
-    
-    def predict(self, context, model_input):
-        return self.model.predict_proba(model_input)[:, 1]
     
 # Model training
 
@@ -212,65 +208,103 @@ def get_xgboost_model(model_grid, model_results):
 
     return xgboost_model
 
-# Docker main script
+# In config?
+
+lr_model = LogisticRegression(max_iter=1000)
+
+lr_params = {
+    "solver": ["lbfgs", "liblinear"],
+    "penalty": ["l2"],
+    "C": uniform(0.01, 100),
+}
+
 @app.command()
 def main(
     input_path: Path = INPUT_PATH,
     output_path: Path = model_results_path,
 ):
     """Model training pipeline."""
-    
+
     logger.info("Processing started")
+
     
-    # 1. Load data
+    # Data preparation 
+    
     data = load_data(input_path)
 
-    # 2. split data
     cat_vars, other_vars = data_type_split(data, CAT_COLUMNS)
-
-    # 3. categorical dummy variables
     data = categorical_dummy_variables(cat_vars, other_vars)
-    
-    # 4. Split data into features and target
-    y, X = split_data(data, TARGET_COLUMN)
-    
-    # 5. Split data into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, 
-                                                        y, 
-                                                        random_state = RANDOM_STATE, 
-                                                        test_size=0.15, 
-                                                        stratify=y)
 
-    # 6. Get model grid
+    y, X = split_data(data, TARGET_COLUMN)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        random_state=RANDOM_STATE,
+        test_size=0.15,
+        stratify=y,
+    )
+
+    
+    # XGBoost training 
+    
     model_grid = setup_grid_search(model, params, X_train, y_train)
 
-    # 7. Get best parameters
     best_model_xgboost_params, y_pred_train, y_pred_test = get_best_model_params(
-    model_grid,
-    X_train,
-    X_test,
-    y_train,
-    y_test,
-)
+        model_grid,
+        X_train,
+        X_test,
+        y_train,
+        y_test,
+    )
 
-#     # 8. Get confusion matrix
-    conf_matrix_test, conf_matrix_train = get_confusion_matrix(y_test, 
-        y_pred_test, 
-        y_train, 
-        y_pred_train)
+    conf_matrix_test, conf_matrix_train = get_confusion_matrix(
+        y_test,
+        y_pred_test,
+        y_train,
+        y_pred_train,
+    )
 
-    # 11. Get model
-    xgboost_model = model_grid.best_estimator_
 
-    data.to_csv(output_path, index=False)
+    # MLflow + Logistic 
 
-    # MLflow tracking
-    with mlflow.start_run():
-        mlflow.log_param("param_distributions", str(params))
-        mlflow.log_param("Best xgboost params", str(best_model_xgboost_params))
-        mlflow.log_artifact(accuracy_scores_path)
-        mlflow.log_artifact(classification_reports_path)
-        mlflow.log_artifact(classification_reports_path)
+    current_date = datetime.datetime.now().strftime("%Y_%B_%d")
+    experiment_name = current_date
+
+    mlflow.set_experiment(experiment_name)
+    experiment_id = mlflow.get_experiment_by_name(experiment_name).experiment_id
+    
+    mlflow.sklearn.autolog(log_input_examples=True, log_models=False)
+
+    with mlflow.start_run(experiment_id=experiment_id):
+
+        lr_grid = setup_grid_search(lr_model, lr_params, X_train, y_train)
+        best_lr_model = lr_grid.best_estimator_
+
+        y_pred_train = best_lr_model.predict(X_train)
+        y_pred_test = best_lr_model.predict(X_test)
+
+        # Metrics (same as notebook)
+        mlflow.log_metric("f1_test", f1_score(y_test, y_pred_test))
+        mlflow.log_metric(
+            "kappa_test",
+            cohen_kappa_score(y_test, y_pred_test),
+        )
+
+        # Params
+        mlflow.log_params(lr_grid.best_params_)
+        mlflow.log_param("data_version", "00000")
+
+        # Save model 
+        joblib.dump(best_lr_model, lr_model_path)
+        mlflow.log_artifact(lr_model_path, artifact_path="model")
+
+        mlflow.pyfunc.log_model(
+            artifact_path="model_pyfunc",
+            python_model=lr_wrapper(best_lr_model),
+        )
+
+    logger.info("Training completed")
 
 if __name__ == "__main__":
-    app()
+    main()
