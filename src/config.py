@@ -5,7 +5,6 @@ import os
 import datetime
 
 # Make the folders for the docker container storage within dagger pipeline
-os.makedirs("output", exist_ok=True)
 os.makedirs("artifacts", exist_ok=True)
 os.makedirs("mlruns", exist_ok=True)
 
