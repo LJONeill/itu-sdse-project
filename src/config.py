@@ -4,8 +4,10 @@ from pathlib import Path
 import os
 import datetime
 
-# Make the folder for the docker container storage within dagger pipeline
+# Make the folders for the docker container storage within dagger pipeline
 os.makedirs("output", exist_ok=True)
+os.makedirs("artifacts", exist_ok=True)
+os.makedirs("mlruns", exist_ok=True)
 
 # Paths
 PROJ_ROOT = Path(__file__).resolve().parents[1]
