@@ -99,14 +99,7 @@ func Build(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
-	_, err = selection.
-		Directory("/repo/mlruns").
-		Export(ctx, "mlruns")
-	if err != nil {
-		return err
-	}
-
+	
 	_, err = selection.
 		Directory("/repo/mlruns").
 		Export(ctx, "mlruns")

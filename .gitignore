@@ -10,7 +10,6 @@
 .dvc/cache/
 
 # large or unwanted folders
-data/interim
 data/external
 data/processed
 
