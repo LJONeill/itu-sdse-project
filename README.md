@@ -21,29 +21,30 @@ The cookiecutter files contain 5 py files which make up the majority of the code
 
 ![Standard ML Project Structure](./docs/standard-ml-structure.png)
 
-The following illustrates the repository structure for this project
+The following illustrates some of the key parts of the repository structure for this project:
 
-    ├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-    ├── README.md          <- The README for this project.
+    ├── README.md          <- The README for this project
+
+    ├── .github/workflows  <- This contains the Github automation workflow
+
     ├── data
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- Contains a file for the dvc pull of the raw data from it's source.
-    │                          This promotes version control.
+    │   ├── interim        <- This is where the final model gets stored
+    │   └── raw            <- Contains a file for the dvc pull of the raw data from it's source,
+    │                          this promotes version control
     │
     ├── docs               <- A folder containing the images used in this README.md
     │
-    ├── models             <- Trained models and their performance metrics
-    │
     ├── notebooks          <- Jupyter notebooks containing all the original code for this project, 
-    │    │                     which is an excerpt and re-written example from a real production model.
+    │    │                     which is an excerpt and re-written example from a real production model
     │    │             
     │    └── main.ipynb    <- This contains the project task outline,
     │                           as well as the data processing part of the ML pipeline
     │
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment
+
+    ├── pipeline.go        <- This contains the dagger pipeline that organises the code workflow 
     │
-    └── src   <- Source code for use in this project.
+    └── src   <- Source code for use in this project
         │
         ├── config.py               <- Store useful variables and configuration
         │
