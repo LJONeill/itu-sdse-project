@@ -60,4 +60,4 @@ In order to run this project, clone this repository, then type the following int
 
     go run pipeline.go
 
-Subsequently, the most important output, the trained model named 'model', can be found in the models folder.
+Subsequently, the most important output, the trained model file named 'lr_model.pkl', can be found in the data/interim folder.
