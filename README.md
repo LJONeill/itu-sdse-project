@@ -24,9 +24,9 @@ The cookiecutter files contain 5 py files which make up the majority of the code
 The following illustrates some of the key parts of the repository structure for this project:
 
     ├── README.md          <- The README for this project
-
+    │ 
     ├── .github/workflows  <- This contains the Github automation workflow
-
+    │ 
     ├── data
     │   ├── interim        <- This is where the final model gets stored
     │   └── raw            <- Contains a file for the dvc pull of the raw data from it's source,
@@ -41,7 +41,7 @@ The following illustrates some of the key parts of the repository structure for 
     │                           as well as the data processing part of the ML pipeline
     │
     ├── requirements.txt   <- The requirements file for reproducing the analysis environment
-
+    │ 
     ├── pipeline.go        <- This contains the dagger pipeline that organises the code workflow 
     │
     └── src   <- Source code for use in this project
